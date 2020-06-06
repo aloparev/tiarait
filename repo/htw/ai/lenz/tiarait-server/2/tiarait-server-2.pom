@@ -4,5 +4,5 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>htw.ai.lenz</groupId>
   <artifactId>tiarait-server</artifactId>
-  <version>1</version>
+  <version>2</version>
 </project>
