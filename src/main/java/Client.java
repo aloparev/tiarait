@@ -25,11 +25,17 @@ public class Client
         System.out.println("tiarait client up and running: host=" + host + " team=" + team);
 
         NetworkClient nc = new NetworkClient(host, team);
+        Board bb = new Board(nc.getMyPlayerNumber()); // 0-3 (ACHTUNG! andere Nummerierung als beim ColorChange)
 
-        nc.getMyPlayerNumber(); // 0-3 (ACHTUNG! andere Nummerierung als beim ColorChange)
-        log.info("my nr=" + nc.getMyPlayerNumber());
-        log.info("testing enemy location, [1-4].bots - me");
+        for(int i=0; i<bb.SIZE; i++) //x
+            for(int j=0; j<bb.SIZE; j++) //y
+                if(nc.isWall(i, j)) {
+//                    log.info(i + "/" + j + " isWall");
+                    bb.board[i][j] = bb.WALL;
+                }
 
+        /*
+        log.info("testing enemy location, [1-4].bots");
         log.info("player1-red.bot0 x=" + nc.getX(0, 0) + " y=" + nc.getY(0, 0));
         log.info("player1-red.bot1 x=" + nc.getX(0, 1) + " y=" + nc.getY(0, 1));
         log.info("player1-red.bot2 x=" + nc.getX(0, 2) + " y=" + nc.getY(0, 2));
@@ -38,21 +44,20 @@ public class Client
         log.info("player2-blu.bot1 x=" + nc.getX(1, 1) + " y=" + nc.getY(1, 1));
         log.info("player2-blu.bot2 x=" + nc.getX(1, 2) + " y=" + nc.getY(1, 2));
 
-        log.info("player3-gre.bot0 x=" + nc.getX(1, 0) + " y=" + nc.getY(1, 0));
-        log.info("player3-gre.bot1 x=" + nc.getX(1, 1) + " y=" + nc.getY(1, 1));
-        log.info("player3-gre.bot2 x=" + nc.getX(1, 2) + " y=" + nc.getY(1, 2));
-
         log.info("player3-yel.bot0 x=" + nc.getX(1, 0) + " y=" + nc.getY(1, 0));
         log.info("player3-yel.bot1 x=" + nc.getX(1, 1) + " y=" + nc.getY(1, 1));
         log.info("player3-yel.bot2 x=" + nc.getX(1, 2) + " y=" + nc.getY(1, 2));
 
+        log.info("player4-gre.bot0 x=" + nc.getX(1, 0) + " y=" + nc.getY(1, 0));
+        log.info("player4-gre.bot1 x=" + nc.getX(1, 1) + " y=" + nc.getY(1, 1));
+        log.info("player4-gre.bot2 x=" + nc.getX(1, 2) + " y=" + nc.getY(1, 2));
+*/
         while (nc.isAlive()) {
 // steuerung
 //            float x = nc.getX(player, botNr);
 //            float y = nc.getY(player, botNr);
 
 //            double loop to identify walls
-            nc.isWall(7, 11); //true wenn bei Koordinate 7,11 ein Hindernis steht
 
             Scanner sc = new Scanner(System.in);
             try {
@@ -62,6 +67,9 @@ public class Client
                 log.info("NumberFormatError: hold on");
                 x=0; y=0;
             }
+
+            if(x>-1 && x<33 && y>-1 && y<33)
+                log.info("wall check for x/y: " + nc.isWall(Math.round(x), Math.round(y))); //true wenn bei Koordinate 7,11 ein Hindernis steht
 
             xr = rand.nextFloat(); yr = rand.nextFloat();
             if(negative) {

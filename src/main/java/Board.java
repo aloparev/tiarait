@@ -1,28 +1,20 @@
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.TreeSet;
-import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
 
+import java.util.Arrays;
+import java.util.List;
+
+@Slf4j
 public class Board {
+    final int SIZE = 32;
+    final int WALL = -1;
     int owner;
     int[] scores;
-    TreeSet<Integer> fre;
-    TreeSet<Integer> wal;
-    TreeSet<Integer> red;
-    TreeSet<Integer> gre;
-    TreeSet<Integer> blu;
-    TreeSet<Integer> yel;
+    int[][] board;
 
-    public Board(int owner, int[] walls) {
+    public Board(int owner) {
         this.owner = owner;
         scores = new int[] {0, 0, 0, 0}; //plus init position
-        wal = new TreeSet<>();
-        fre = new TreeSet<>();
-
-        for(int wall : walls) {
-            wal.add(wall);
-            fre.remove(wall);
-        }
+        board = new int[SIZE][SIZE];
+        log.info("MyPlayerNumber=" + owner);
     }
 }
