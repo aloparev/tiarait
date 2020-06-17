@@ -16,7 +16,7 @@ public class Client
         float x, y;
         float xr, yr;
         Random rand = new Random();
-        boolean negative = true;
+        boolean switcher = true;
 
         if(args.length == 2) {
             host = args[0];
@@ -26,9 +26,12 @@ public class Client
 
         NetworkClient nc = new NetworkClient(host, team);
         Board bb = new Board(nc.getMyPlayerNumber()); // 0-3 (ACHTUNG! andere Nummerierung als beim ColorChange)
+        ColorChange cc;
+        Logic logic = new Logic();
 
-        for(int i=0; i<bb.SIZE; i++) //x
-            for(int j=0; j<bb.SIZE; j++) //y
+        //init obstacles
+        for(int i=1; i<bb.SIZE-1; i++) //x
+            for(int j=1; j<bb.SIZE-1; j++) //y
                 if(nc.isWall(i, j)) {
 //                    log.info(i + "/" + j + " isWall");
                     bb.board[i][j] = bb.WALL;
@@ -57,8 +60,7 @@ public class Client
 //            float x = nc.getX(player, botNr);
 //            float y = nc.getY(player, botNr);
 
-//            double loop to identify walls
-
+            //manual control
             Scanner sc = new Scanner(System.in);
             try {
                 x = Float.parseFloat(sc.nextLine());
@@ -68,22 +70,24 @@ public class Client
                 x=0; y=0;
             }
 
+            //manual walls inspection
             if(x>-1 && x<33 && y>-1 && y<33)
                 log.info("wall check for x/y: " + nc.isWall(Math.round(x), Math.round(y))); //true wenn bei Koordinate 7,11 ein Hindernis steht
 
+            //random cube and eraser
             xr = rand.nextFloat(); yr = rand.nextFloat();
-            if(negative) {
+            if(switcher) {
                 nc.setMoveDirection(0, xr, yr);
                 nc.setMoveDirection(1, -1*xr, -1*yr);
-
-                negative=false;
+                switcher=false;
+                log.info("x=" + x + " y=" + y + " | xr=" + xr + " yr=" + yr);
             } else {
                 nc.setMoveDirection(0, xr, -1*yr);
                 nc.setMoveDirection(1, -1*xr, yr);
-
-                negative=true;
+                switcher=true;
+                log.info("x=" + x + " y=" + y + " | xr=" + xr + " yr=" + yr);
             }
-            log.info("x=" + x + " y=" + y + " | xr=" + xr + " yr=" + yr);
+            log.info("swith=" + switcher);
 
             //eraser
 //            nc.setMoveDirection(0, -5.1f, -0.8f);
@@ -94,7 +98,6 @@ public class Client
 //            pyramid
             nc.setMoveDirection(2, x, y);
 
-            ColorChange cc;
             // cc in eigene Struktur einarbeiten
             while ((cc = nc.getNextColorChange()) != null) {
 //                z.B. brett[cc.x][cc.y] = cc.newColor;
