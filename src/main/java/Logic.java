@@ -1,17 +1,9 @@
 public class Logic {
-    double getDistance(Cell source, Cell target, boolean manhattan) {
-        double xd = Math.abs(target.x-source.x);
-        double yd = Math.abs(target.y-source.y);
-
-        if(manhattan)
-            return xd + yd;
-
-        return Math.hypot(xd, yd);
+    static int getZz(int x, int y) {
+        return x + Board.SIZE *y;
     }
 
-    Cell getMoveVector(Cell source, Cell target) {
-        return new Cell(target.x-source.x, target.y-source.y);
+    static Cell getXy(int zz) {
+        return new Cell(zz% Board.SIZE, zz/ Board.SIZE);
     }
-
-
 }

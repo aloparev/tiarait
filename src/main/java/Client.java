@@ -5,6 +5,18 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.Random;
 import java.util.Scanner;
 
+/**
+ * player colors
+ *  1=red
+ *  2=blue
+ *  3=yellow
+ *  4=green
+ *
+ * bots
+ *  0=eraser
+ *  1=cube
+ *  2=pyramid
+ */
 @Slf4j
 public class Client
 {
@@ -25,16 +37,16 @@ public class Client
         System.out.println("tiarait client up and running: host=" + host + " team=" + team);
 
         NetworkClient nc = new NetworkClient(host, team);
-        Board bb = new Board(nc.getMyPlayerNumber()); // 0-3 (ACHTUNG! andere Nummerierung als beim ColorChange)
+        Board board = new Board(nc.getMyPlayerNumber()); // 0-3 (ACHTUNG! andere Nummerierung als beim ColorChange)
         ColorChange cc;
         Logic logic = new Logic();
 
         //init obstacles
-        for(int i=1; i<bb.SIZE-1; i++) //x
-            for(int j=1; j<bb.SIZE-1; j++) //y
+        for(int i=1; i<board.SIZE-1; i++) //x
+            for(int j=1; j<board.SIZE-1; j++) //y
                 if(nc.isWall(i, j)) {
 //                    log.info(i + "/" + j + " isWall");
-                    bb.board[i][j] = bb.WALL;
+                    board.bb[i][j] = board.WALL;
                 }
 
         /*
