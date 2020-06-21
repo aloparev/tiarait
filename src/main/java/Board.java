@@ -1,6 +1,8 @@
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @Slf4j
 public class Board {
@@ -121,17 +123,41 @@ public class Board {
     }
 
     Stack<Integer> dijkstra(Cell source, Cell target) {
-        Stack<Integer> path = new Stack<>();
-        NavigableSet<Cell> queue = new TreeSet<>(getNeighbors(source));
+        HashMap<Integer, Cell> allNodes = new HashMap<Integer, Cell>() {{
+            put(source.zz, source);
+        }};
+        Stack<Cell> queue = new Stack<Cell>() {{
+            add(source);
+        }};
 
         while(!queue.isEmpty()) {
+            Cell node = queue.pop();
+            List<Cell> neighbors = getNeighbors(node);
 
+            for(Cell neighbor : neighbors) {
+                int nid = neighbor.zz;
+                if(!allNodes.containsKey(nid))
+                    allNodes.put(nid, neighbor);
+
+                int newDistance = node.dist + neighbor.weight;
+                if(newDistance < allNodes.get(nid).dist) {
+                    allNodes.get(nid).dist = newDistance;
+                    allNodes.get(nid).prev = node.zz;
+                    queue.add(neighbor);
+                }
+            }
         }
 
-        /*
+        return unfoldPath(target.zz, allNodes);
+    }
 
-         */
-
+    Stack<Integer> unfoldPath(int target, HashMap<Integer, Cell> data) {
+        Stack<Integer> path = new Stack<>();
+        int newTarget = -1;
+        do {
+            path.push(target);
+            newTarget = data.get(target).prev;
+        } while(newTarget != -1);
         return path;
     }
 
@@ -149,13 +175,11 @@ public class Board {
     }
 
     private Cell createNode(int x, int y) {
-        Cell cell = new Cell(x, y);
-        cell.weight = getWeight(cell);
-        return cell;
+        return new Cell(x, y, getWeight(x, y));
     }
 
-    private int getWeight(Cell cell) {
-        int color = bb[cell.x][cell.y];
+    private int getWeight(int x, int y) {
+        int color = bb[x][y];
 
         if(enemies.contains(color)) return 1;
         else if(color == 0) return 2;
