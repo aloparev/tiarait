@@ -1,3 +1,4 @@
+import lenz.htw.tiarait.net.NetworkClient;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.*;
@@ -12,10 +13,12 @@ public class Board {
     TreeSet<Integer> enemies;
 //    int[] scores;
     int[][] bb;
+    NetworkClient nc;
 
-    public Board(int owner) {
-        this.owner = owner;
-        this.enemies = new TreeSet<Integer>() {{
+    public Board(NetworkClient nc) {
+        this.nc = nc;
+        owner = nc.getMyPlayerNumber();
+        enemies = new TreeSet<Integer>() {{
                 add(1);
                 add(2);
                 add(3);
@@ -127,21 +130,42 @@ public class Board {
     }
 
     Stack<Integer> getStack(int bot) {
-        findTarget(bot);
+        return evaluate(bot);
     }
 
-    private void findTarget(int bot) {
-
-        return dijkstra()
+    Stack<Integer> evaluate(int bot) {
+        return dijkstra(bot, findTarget(bot));
     }
 
-    Stack<Integer> dijkstra(Cell source, Cell target) {
-        CellNode sourceNode = new CellNode(source);
+    Cell findTarget(int bot) {
+        switch (bot) {
+            case 0:
+
+            //find the next cell from someone else
+            case 1:
+                for(int i=0; i<Board.SIZE-1; i++) //x
+                    for(int j=0; j<Board.SIZE-1; j++) //y
+                        if(notWall(i, j) && bb[i][j] != owner)
+                            return new Cell(i, j);
+            case 2:
+            default: return getCoords(bot);
+        }
+    }
+
+    Cell getCoords(int bot) {
+        return new Cell(nc.getX(owner, bot), nc.getY(owner, bot));
+    }
+
+    /**
+     * calculates path from the current bot position to the given target
+     */
+    Stack<Integer> dijkstra(int bot, Cell target) {
+        CellNode source = new CellNode(getCoords(bot));
         HashMap<Integer, CellNode> allNodes = new HashMap<Integer, CellNode>() {{
-            put(sourceNode.zz, sourceNode);
+            put(source.zz, source);
         }};
         Stack<CellNode> queue = new Stack<CellNode>() {{
-            add(sourceNode);
+            add(source);
         }};
 
         while(!queue.isEmpty()) {

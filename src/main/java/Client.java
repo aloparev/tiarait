@@ -21,11 +21,10 @@ import java.util.Stack;
 @Slf4j
 public class Client {
     public static final int ERASER = 0;
-    public static final int CUBE = 0;
-    public static final int PYRAMID = 0;
+    public static final int CUBE = 1;
+    public static final int PYRAMID = 2;
 
-    public static void main( String[] args )
-    {
+    public static void main( String[] args ) {
         String team = "fox";
         String host = "127.0.0.1";
 
@@ -41,15 +40,15 @@ public class Client {
 //        boolean switcher = true;
 
         NetworkClient nc = new NetworkClient(host, team);
-        Board board = new Board(nc.getMyPlayerNumber()); // 0-3 (ACHTUNG! andere Nummerierung als beim ColorChange)
+        Board board = new Board(nc); // 0-3 (ACHTUNG! andere Nummerierung als beim ColorChange)
         ColorChange cc;
         Stack<Integer> cubeStack = new Stack<>();
         Stack<Integer> pyramidStack = new Stack<>();
         Stack<Integer> eraserStack = new Stack<>();
 
         //init obstacles
-        for(int i = 1; i<Board.SIZE -1; i++) //x
-            for(int j=1; j<Board.SIZE-1; j++) //y
+        for(int i=0; i<Board.SIZE-1; i++) //x
+            for(int j=0; j<Board.SIZE-1; j++) //y
                 if(nc.isWall(i, j)) {
 //                    log.info(i + "/" + j + " isWall");
                     board.bb[i][j] = Board.WALL;
@@ -118,4 +117,6 @@ public class Client {
             }
         }
     }
+
+
 }
