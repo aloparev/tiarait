@@ -14,9 +14,16 @@ public class CellNode extends Cell {
     }
 
     public CellNode(Cell that) {
-        super(that.x, that.y);
+        super(that.x, that.y, that.zz);
         this.weight = 0; //if not provided, set to zero
         this.dist = Integer.MAX_VALUE; //infinity
         this.prev = -1; //undefined
+    }
+
+    public CellNode(int zz, int weight, int dist, int prev) {
+        super(zz);
+        this.weight = weight;
+        this.dist = dist;
+        this.prev = prev;
     }
 }

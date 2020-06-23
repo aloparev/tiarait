@@ -5,7 +5,7 @@ import java.util.stream.IntStream;
 
 public class Logic {
     static int getZz(int x, int y) {
-        return x + Board.SIZE *y;
+        return x + Board.SIZE * y;
     }
 
     static int getZz(float x, float y) {

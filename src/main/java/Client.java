@@ -73,45 +73,45 @@ public class Client {
         log.info("player4-gre.bot2 x=" + nc.getX(1, 2) + " y=" + nc.getY(1, 2));
 */
         while (nc.isAlive()) {
-// steuerung
-//            float x = nc.getX(player, botNr);
-//            float y = nc.getY(player, botNr);
-
-            //manual control
-            Scanner sc = new Scanner(System.in);
-            try {
-                x = Float.parseFloat(sc.nextLine());
-                y = Float.parseFloat(sc.nextLine());
-            } catch (NumberFormatException nu) {
-                log.info("NumberFormatError: hold on");
-                x=0; y=0;
-            }
-
-            //manual walls inspection
-            if(x>-1 && x<33 && y>-1 && y<33)
-                log.info("wall check for x/y: " + nc.isWall(Math.round(x), Math.round(y))); //true wenn bei Koordinate 7,11 ein Hindernis steht
-
             //eraser >> random
             xr = (float) (rand.nextFloat() - .5);
             yr = (float) (rand.nextFloat() - .5);
-            nc.setMoveDirection(0, xr, yr);
-            log.info("x=" + x + " y=" + y + " | xr=" + xr + " yr=" + yr);
+            nc.setMoveDirection(ERASER, xr, yr);
+            log.info("xr=" + xr + " yr=" + yr);
+//            log.info("x=" + x + " y=" + y + " | xr=" + xr + " yr=" + yr);
 
             //cube
-            if(cubeStack.isEmpty())
+            if(cubeStack.isEmpty()) {
                 cubeStack = board.getStack(CUBE);
+                log.info("cube stack init");
+            }
             else {
                 int nextStep = cubeStack.pop();
-                Cell coords = board.getMoveVector(nc.getX(board.owner, CUBE), nc.getY(board.owner, CUBE), nextStep);
+                Cell coords = board.getMoveVector(CUBE, nextStep);
                 nc.setMoveDirection(CUBE, coords.x, coords.y);
+                log.info("cube stack pop: " + coords);
             }
 
-//            pyramid
-            nc.setMoveDirection(2, x, y);
+            //manual control
+//            Scanner sc = new Scanner(System.in);
+//            try {
+//                x = Float.parseFloat(sc.nextLine());
+//                y = Float.parseFloat(sc.nextLine());
+//            } catch (NumberFormatException nu) {
+//                log.info("NumberFormatError: hold on");
+//                x=0; y=0;
+//            }
+//
+//            //manual walls inspection
+//            if(x>-1 && x<Board.SIZE && y>-1 && y<Board.SIZE)
+//                log.info("wall check for x/y: " + nc.isWall(Math.round(x), Math.round(y))); //true wenn bei Koordinate 7,11 ein Hindernis steht
+//
+////            pyramid
+//            nc.setMoveDirection(PYRAMID, x, y);
 
             // cc in eigene Struktur einarbeiten
             while ((cc = nc.getNextColorChange()) != null) {
-//                z.B. brett[cc.x][cc.y] = cc.newColor;
+                board.bb[cc.x][cc.y] = cc.newColor;
 //                cc.newColor; //0 = leer, 1-4 = spieler
                 log.info("cc new color=" + cc.newColor + " cc.x=" + cc.x + " cc.y=" + cc.y);
             }

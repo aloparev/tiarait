@@ -15,20 +15,24 @@ public class Board {
     int[][] bb;
     NetworkClient nc;
 
-    public Board(NetworkClient nc) {
-        this.nc = nc;
-        owner = nc.getMyPlayerNumber();
+    public Board(int owner) {
+        this.owner = owner;
         enemies = new TreeSet<Integer>() {{
-                add(1);
-                add(2);
-                add(3);
-                add(4);
-                remove(owner);
-            }};
+            add(1);
+            add(2);
+            add(3);
+            add(4);
+            remove(owner);
+        }};
 //        scores = new int[] {0, 0, 0, 0}; //plus init position
         bb = new int[SIZE][SIZE];
         initWalls();
         log.info("MyPlayerNumber=" + owner);
+    }
+
+    public Board(NetworkClient nc) {
+        this(nc.getMyPlayerNumber() + 1);
+        this.nc = nc;
     }
 
     /**
@@ -113,6 +117,15 @@ public class Board {
 //                log.info(i + "/" + j + "=" + board[i][j]);
     }
 
+    void printArena() {
+        for(int y=SIZE-1; y>-1; y--) { //x
+            System.out.println();
+            for (int x = 0; x < SIZE; x++) { //y
+                System.out.printf("%2d ", bb[x][y]);
+            }
+        }
+    }
+
     double getDistance(Cell source, Cell target, boolean manhattan) {
         double xd = Math.abs(target.x-source.x);
         double yd = Math.abs(target.y-source.y);
@@ -121,8 +134,9 @@ public class Board {
         return Math.hypot(xd, yd);
     }
 
-    Cell getMoveVector(Cell source, Cell target) {
-        return new Cell(target.x-source.x, target.y-source.y);
+    Cell getMoveVector(int bot, int target) {
+        Cell source = getCoords(bot);
+        return new Cell(Logic.getX(target) - source.x, Logic.getY(target) - source.y);
     }
 
     Cell getMoveVector(float sourceX, float sourceY, int target) {
@@ -134,7 +148,7 @@ public class Board {
     }
 
     Stack<Integer> evaluate(int bot) {
-        return dijkstra(bot, findTarget(bot));
+        return dijkstra(getCoords(bot), findTarget(bot));
     }
 
     Cell findTarget(int bot) {
@@ -143,8 +157,8 @@ public class Board {
 
             //find the next cell from someone else
             case 1:
-                for(int i=0; i<Board.SIZE-1; i++) //x
-                    for(int j=0; j<Board.SIZE-1; j++) //y
+                for(int i=0; i<Board.SIZE; i++) //x
+                    for(int j=0; j<Board.SIZE; j++) //y
                         if(notWall(i, j) && bb[i][j] != owner)
                             return new Cell(i, j);
             case 2:
@@ -159,43 +173,46 @@ public class Board {
     /**
      * calculates path from the current bot position to the given target
      */
-    Stack<Integer> dijkstra(int bot, Cell target) {
-        CellNode source = new CellNode(getCoords(bot));
-        HashMap<Integer, CellNode> allNodes = new HashMap<Integer, CellNode>() {{
+    Stack<Integer> dijkstra(Cell sourceInit, Cell targetInit) {
+        CellNode source = new CellNode(sourceInit);
+        CellNode target = new CellNode(targetInit);
+        source.dist = 0; //init distance
+
+        HashMap<Integer, CellNode> nodes = new HashMap<Integer, CellNode>() {{
             put(source.zz, source);
         }};
         Stack<CellNode> queue = new Stack<CellNode>() {{
             add(source);
         }};
 
-        while(!queue.isEmpty()) {
+        while(!queue.isEmpty() && !nodes.containsKey(target.zz)) {
             CellNode node = queue.pop();
             List<CellNode> neighbors = getNeighbors(node);
 
             for(CellNode neighbor : neighbors) {
                 int nid = neighbor.zz;
-                if(!allNodes.containsKey(nid))
-                    allNodes.put(nid, neighbor);
+                if(!nodes.containsKey(nid))
+                    nodes.put(nid, neighbor);
 
                 int newDistance = node.dist + neighbor.weight;
-                if(newDistance < allNodes.get(nid).dist) {
-                    allNodes.get(nid).dist = newDistance;
-                    allNodes.get(nid).prev = node.zz;
+                if(newDistance < nodes.get(nid).dist) {
+                    nodes.get(nid).dist = newDistance;
+                    nodes.get(nid).prev = node.zz;
                     queue.add(neighbor);
                 }
             }
         }
 
-        return unfoldPath(target.zz, allNodes);
+        return unfoldPath(source.zz, target.zz, nodes);
     }
 
-    Stack<Integer> unfoldPath(int target, HashMap<Integer, CellNode> data) {
+    Stack<Integer> unfoldPath(int source, int target, HashMap<Integer, CellNode> data) {
         Stack<Integer> path = new Stack<>();
-        int newTarget = -1;
         do {
-            path.push(target);
-            newTarget = data.get(target).prev;
-        } while(newTarget != -1);
+            if(target != source) //get rid of current position
+                path.push(target);
+            target = data.get(target).prev;
+        } while(target != -1);
         return path;
     }
 
