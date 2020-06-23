@@ -8,8 +8,20 @@ public class Logic {
         return x + Board.SIZE *y;
     }
 
+    static int getZz(float x, float y) {
+        return (int) (x + Board.SIZE * y);
+    }
+
     static Cell getXy(int zz) {
-        return new Cell(zz% Board.SIZE, zz/ Board.SIZE);
+        return new Cell(zz % Board.SIZE, zz / Board.SIZE);
+    }
+
+    static int getX(int zz) {
+        return zz % Board.SIZE;
+    }
+
+    static int getY(int zz) {
+        return zz / Board.SIZE;
     }
 
     static <T> List<T> reverseList(List<T> list) {

@@ -122,19 +122,33 @@ public class Board {
         return new Cell(target.x-source.x, target.y-source.y);
     }
 
+    Cell getMoveVector(float sourceX, float sourceY, int target) {
+        return new Cell(Logic.getX(target) - sourceX, Logic.getY(target) - sourceY);
+    }
+
+    Stack<Integer> getStack(int bot) {
+        findTarget(bot);
+    }
+
+    private void findTarget(int bot) {
+
+        return dijkstra()
+    }
+
     Stack<Integer> dijkstra(Cell source, Cell target) {
-        HashMap<Integer, Cell> allNodes = new HashMap<Integer, Cell>() {{
-            put(source.zz, source);
+        CellNode sourceNode = new CellNode(source);
+        HashMap<Integer, CellNode> allNodes = new HashMap<Integer, CellNode>() {{
+            put(sourceNode.zz, sourceNode);
         }};
-        Stack<Cell> queue = new Stack<Cell>() {{
-            add(source);
+        Stack<CellNode> queue = new Stack<CellNode>() {{
+            add(sourceNode);
         }};
 
         while(!queue.isEmpty()) {
-            Cell node = queue.pop();
-            List<Cell> neighbors = getNeighbors(node);
+            CellNode node = queue.pop();
+            List<CellNode> neighbors = getNeighbors(node);
 
-            for(Cell neighbor : neighbors) {
+            for(CellNode neighbor : neighbors) {
                 int nid = neighbor.zz;
                 if(!allNodes.containsKey(nid))
                     allNodes.put(nid, neighbor);
@@ -151,7 +165,7 @@ public class Board {
         return unfoldPath(target.zz, allNodes);
     }
 
-    Stack<Integer> unfoldPath(int target, HashMap<Integer, Cell> data) {
+    Stack<Integer> unfoldPath(int target, HashMap<Integer, CellNode> data) {
         Stack<Integer> path = new Stack<>();
         int newTarget = -1;
         do {
@@ -161,8 +175,8 @@ public class Board {
         return path;
     }
 
-    List<Cell> getNeighbors(Cell source) {
-        List<Cell> ans = new ArrayList<>();
+    List<CellNode> getNeighbors(Cell source) {
+        List<CellNode> ans = new ArrayList<>();
         if(notWall(source.x, source.y+1)) ans.add(createNode(source.x, source.y+1));
         if(notWall(source.x+1, source.y)) ans.add(createNode(source.x+1, source.y));
         if(notWall(source.x, source.y-1)) ans.add(createNode(source.x, source.y-1));
@@ -174,8 +188,8 @@ public class Board {
         return bb[x][y] != -1;
     }
 
-    private Cell createNode(int x, int y) {
-        return new Cell(x, y, getWeight(x, y));
+    private CellNode createNode(int x, int y) {
+        return new CellNode(x, y, getWeight(x, y));
     }
 
     private int getWeight(int x, int y) {

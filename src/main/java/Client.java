@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.Random;
 import java.util.Scanner;
+import java.util.Stack;
 
 /**
  * player colors
@@ -18,17 +19,15 @@ import java.util.Scanner;
  *  2=pyramid
  */
 @Slf4j
-public class Client
-{
+public class Client {
+    public static final int ERASER = 0;
+    public static final int CUBE = 0;
+    public static final int PYRAMID = 0;
+
     public static void main( String[] args )
     {
         String team = "fox";
         String host = "127.0.0.1";
-
-        float x, y;
-        float xr, yr;
-        Random rand = new Random();
-        boolean switcher = true;
 
         if(args.length == 2) {
             host = args[0];
@@ -36,17 +35,24 @@ public class Client
         } else log.info("no args for host & team submitted, using defaults");
         System.out.println("tiarait client up and running: host=" + host + " team=" + team);
 
+        float x, y;
+        float xr, yr;
+        Random rand = new Random();
+//        boolean switcher = true;
+
         NetworkClient nc = new NetworkClient(host, team);
         Board board = new Board(nc.getMyPlayerNumber()); // 0-3 (ACHTUNG! andere Nummerierung als beim ColorChange)
         ColorChange cc;
-        Logic logic = new Logic();
+        Stack<Integer> cubeStack = new Stack<>();
+        Stack<Integer> pyramidStack = new Stack<>();
+        Stack<Integer> eraserStack = new Stack<>();
 
         //init obstacles
-        for(int i=1; i<board.SIZE-1; i++) //x
-            for(int j=1; j<board.SIZE-1; j++) //y
+        for(int i = 1; i<Board.SIZE -1; i++) //x
+            for(int j=1; j<Board.SIZE-1; j++) //y
                 if(nc.isWall(i, j)) {
 //                    log.info(i + "/" + j + " isWall");
-                    board.bb[i][j] = board.WALL;
+                    board.bb[i][j] = Board.WALL;
                 }
 
         /*
@@ -86,26 +92,20 @@ public class Client
             if(x>-1 && x<33 && y>-1 && y<33)
                 log.info("wall check for x/y: " + nc.isWall(Math.round(x), Math.round(y))); //true wenn bei Koordinate 7,11 ein Hindernis steht
 
-            //random cube and eraser
-            xr = rand.nextFloat(); yr = rand.nextFloat();
-            if(switcher) {
-                nc.setMoveDirection(0, xr, yr);
-                nc.setMoveDirection(1, -1*xr, -1*yr);
-                switcher=false;
-                log.info("x=" + x + " y=" + y + " | xr=" + xr + " yr=" + yr);
-            } else {
-                nc.setMoveDirection(0, xr, -1*yr);
-                nc.setMoveDirection(1, -1*xr, yr);
-                switcher=true;
-                log.info("x=" + x + " y=" + y + " | xr=" + xr + " yr=" + yr);
+            //eraser >> random
+            xr = (float) (rand.nextFloat() - .5);
+            yr = (float) (rand.nextFloat() - .5);
+            nc.setMoveDirection(0, xr, yr);
+            log.info("x=" + x + " y=" + y + " | xr=" + xr + " yr=" + yr);
+
+            //cube
+            if(cubeStack.isEmpty())
+                cubeStack = board.getStack(CUBE);
+            else {
+                int nextStep = cubeStack.pop();
+                Cell coords = board.getMoveVector(nc.getX(board.owner, CUBE), nc.getY(board.owner, CUBE), nextStep);
+                nc.setMoveDirection(CUBE, coords.x, coords.y);
             }
-            log.info("swith=" + switcher);
-
-            //eraser
-//            nc.setMoveDirection(0, -5.1f, -0.8f);
-
-//            cube
-//            nc.setMoveDirection(1, x, y);
 
 //            pyramid
             nc.setMoveDirection(2, x, y);
