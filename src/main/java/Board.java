@@ -2,18 +2,18 @@ import lenz.htw.tiarait.net.NetworkClient;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 @Slf4j
 public class Board {
     static final int SIZE = 32;
     static final int WALL = -1;
+
     int owner;
     TreeSet<Integer> enemies;
 //    int[] scores;
     int[][] bb;
     NetworkClient nc;
+    CellNode middle; //middle of every path search to limit inspected area
 
     public Board(int owner) {
         this.owner = owner;
@@ -174,6 +174,7 @@ public class Board {
      * calculates path from the current bot position to the given target
      */
     Stack<Integer> dijkstra(Cell sourceInit, Cell targetInit) {
+        middle = getMiddle(sourceInit, targetInit);
         CellNode source = new CellNode(sourceInit);
         CellNode target = new CellNode(targetInit);
         source.dist = 0; //init distance
@@ -184,10 +185,28 @@ public class Board {
         Stack<CellNode> queue = new Stack<CellNode>() {{
             add(source);
         }};
+        Set<Integer> examinedNodes = new HashSet<>();
 
-        while(!queue.isEmpty() && !nodes.containsKey(target.zz)) {
+        while(!queue.isEmpty()) {
             CellNode node = queue.pop();
+//            List<CellNode> neighbors = new ArrayList<>();
             List<CellNode> neighbors = getNeighbors(node);
+//
+//            Cell tempNeighbor = new Cell(node.x, node.y+1);
+//            if(notWallAndNotTooFar(tempNeighbor) && !nodes.containsKey(tempNeighbor.zz))
+//                neighbors.add(new CellNode(tempNeighbor, getWeight(tempNeighbor)));
+//
+//            tempNeighbor = new Cell(node.x+1, node.y);
+//            if(notWallAndNotTooFar(tempNeighbor) && !nodes.containsKey(tempNeighbor.zz))
+//                neighbors.add(new CellNode(tempNeighbor, getWeight(tempNeighbor)));
+//
+//            tempNeighbor = new Cell(node.x, node.y-1);
+//            if(notWallAndNotTooFar(tempNeighbor) && !nodes.containsKey(tempNeighbor.zz))
+//                neighbors.add(new CellNode(tempNeighbor, getWeight(tempNeighbor)));
+//
+//            tempNeighbor = new Cell(node.x-1, node.y);
+//            if(notWallAndNotTooFar(tempNeighbor) && !nodes.containsKey(tempNeighbor.zz))
+//                neighbors.add(new CellNode(tempNeighbor, getWeight(tempNeighbor)));
 
             for(CellNode neighbor : neighbors) {
                 int nid = neighbor.zz;
@@ -198,12 +217,25 @@ public class Board {
                 if(newDistance < nodes.get(nid).dist) {
                     nodes.get(nid).dist = newDistance;
                     nodes.get(nid).prev = node.zz;
-                    queue.add(neighbor);
+
+                    if(!examinedNodes.contains(neighbor.zz)) {
+                        queue.add(neighbor);
+                        examinedNodes.add(neighbor.zz);
+                    }
                 }
             }
         }
 
         return unfoldPath(source.zz, target.zz, nodes);
+    }
+
+    CellNode getMiddle(Cell sourceInit, Cell targetInit) {
+        int x = (sourceInit.x + targetInit.x) / 2;
+        int y = (sourceInit.y + targetInit.y) / 2;
+        int xd = Math.abs(targetInit.x - sourceInit.x);
+        int yd = Math.abs(targetInit.y - sourceInit.y);
+        int weight = Math.max(xd, yd);
+        return new CellNode(x, y, weight);
     }
 
     Stack<Integer> unfoldPath(int source, int target, HashMap<Integer, CellNode> data) {
@@ -216,17 +248,38 @@ public class Board {
         return path;
     }
 
+    /**
+     * clockwise from 12 to 3 to 6 and 9
+     */
     List<CellNode> getNeighbors(Cell source) {
         List<CellNode> ans = new ArrayList<>();
-        if(notWall(source.x, source.y+1)) ans.add(createNode(source.x, source.y+1));
-        if(notWall(source.x+1, source.y)) ans.add(createNode(source.x+1, source.y));
-        if(notWall(source.x, source.y-1)) ans.add(createNode(source.x, source.y-1));
-        if(notWall(source.x-1, source.y)) ans.add(createNode(source.x-1, source.y));
+
+        if(notWallAndNotTooFar(source.x, source.y+1))
+            ans.add(createNode(source.x, source.y+1));
+        if(notWallAndNotTooFar(source.x+1, source.y))
+            ans.add(createNode(source.x+1, source.y));
+        if(notWallAndNotTooFar(source.x, source.y-1))
+            ans.add(createNode(source.x, source.y-1));
+        if(notWallAndNotTooFar(source.x-1, source.y))
+            ans.add(createNode(source.x-1, source.y));
+
         return ans;
+    }
+
+    private boolean notWallAndNotTooFar(int x, int y) {
+        return notWall(x, y) && isReasonable(x, y);
+    }
+
+    private boolean notWallAndNotTooFar(Cell cell) {
+        return notWall(cell.x, cell.y) && isReasonable(cell.x, cell.y);
     }
 
     private boolean notWall(int x, int y) {
         return bb[x][y] != -1;
+    }
+
+    private boolean isReasonable(int x, int y) {
+        return getDistance(new Cell(x, y), middle, true) < middle.weight * 2;
     }
 
     private CellNode createNode(int x, int y) {
@@ -235,6 +288,14 @@ public class Board {
 
     private int getWeight(int x, int y) {
         int color = bb[x][y];
+
+        if(enemies.contains(color)) return 1;
+        else if(color == 0) return 2;
+        else return 4;
+    }
+
+    private int getWeight(Cell cell) {
+        int color = bb[cell.x][cell.y];
 
         if(enemies.contains(color)) return 1;
         else if(color == 0) return 2;

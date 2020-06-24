@@ -1,4 +1,5 @@
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.util.HashMap;
@@ -7,11 +8,17 @@ import java.util.Stack;
 import static org.junit.Assert.*;
 
 public class BoardTest {
-    static Board board;
+    static final double DELTA = 0.01;
 
-    @Before
-    public void setup() {
+    static Board board;
+    static Cell cell_1229;
+    static Cell cell_0929;
+
+    @BeforeClass
+    public static void setup() {
         board = new Board(1);
+        cell_1229 = new Cell(12, 29);
+        cell_0929 = new Cell(9, 29);
     }
 
     @Test
@@ -39,9 +46,23 @@ public class BoardTest {
     }
 
     @Test
+    public void getManhattanDistance() {
+        assertEquals(2, board.getDistance(new Cell(12, 29), new Cell(11, 28), true), DELTA);
+    }
+
+    @Test
+    public void getMiddle() {
+        CellNode middle = board.getMiddle(cell_1229, cell_0929);
+        assertEquals(10, middle.x);
+        assertEquals(29, middle.y);
+        assertEquals(3, middle.weight);
+    }
+
+    @Test
     public void dijkstra() {
-        board.bb[11][29] = 2;
-        Stack<Integer> pathFrom_1229_to_0929 = board.dijkstra(new Cell(12, 29), new Cell(9, 29));
+        board.bb[11][29] = board.owner;
+        Stack<Integer> pathFrom_1229_to_0929 = board.dijkstra(cell_1229, new Cell(11, 28));
+//        Stack<Integer> pathFrom_1229_to_0929 = board.dijkstra(cell_1229, cell_0929);
         System.out.println(pathFrom_1229_to_0929);
     }
 
@@ -55,6 +76,12 @@ public class BoardTest {
             put(940, new CellNode(938, 0, 0, -1));
         }};
         Stack<Integer> path = board.unfoldPath(940, target, nodes);
+        Stack<Integer> ans = new Stack<Integer>() {{
+           add(937);
+           add(938);
+           add(939);
+        }};
+        assertEquals(ans, path);
         System.out.println(path);
     }
 }

@@ -6,6 +6,13 @@ public class CellNode extends Cell {
     int dist; //total distance from source
     int prev; //previous cell
 
+    public CellNode(Cell that, int weight) {
+        super(that.x, that.y);
+        this.weight = weight;
+        this.dist = Integer.MAX_VALUE; //infinity
+        this.prev = -1; //undefined
+    }
+
     public CellNode(int x, int y, int weight) {
         super(x, y);
         this.weight = weight;
@@ -25,5 +32,17 @@ public class CellNode extends Cell {
         this.weight = weight;
         this.dist = dist;
         this.prev = prev;
+    }
+
+    @Override
+    public String toString() {
+        return "CellNode{" +
+                "weight=" + weight +
+                ", dist=" + dist +
+                ", prev=" + prev +
+                ", x=" + x +
+                ", y=" + y +
+                ", zz=" + zz +
+                '}';
     }
 }
