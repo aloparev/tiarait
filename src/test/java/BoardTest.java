@@ -61,8 +61,8 @@ public class BoardTest {
     @Test
     public void dijkstra() {
         board.bb[11][29] = board.owner;
-        Stack<Integer> pathFrom_1229_to_0929 = board.dijkstra(cell_1229, new Cell(11, 28));
-//        Stack<Integer> pathFrom_1229_to_0929 = board.dijkstra(cell_1229, cell_0929);
+//        Stack<Integer> pathFrom_1229_to_0929 = board.dijkstra(cell_1229, new Cell(11, 28));
+        Stack<Integer> pathFrom_1229_to_0929 = board.dijkstra(cell_1229, cell_0929);
         System.out.println(pathFrom_1229_to_0929);
     }
 

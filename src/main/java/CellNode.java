@@ -37,12 +37,12 @@ public class CellNode extends Cell {
     @Override
     public String toString() {
         return "CellNode{" +
-                "weight=" + weight +
-                ", dist=" + dist +
-                ", prev=" + prev +
                 ", x=" + x +
                 ", y=" + y +
                 ", zz=" + zz +
+                ", weight=" + weight +
+                ", dist=" + dist +
+                ", prev=" + prev +
                 '}';
     }
 }

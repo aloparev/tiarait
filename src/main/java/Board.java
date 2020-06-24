@@ -182,42 +182,30 @@ public class Board {
         HashMap<Integer, CellNode> nodes = new HashMap<Integer, CellNode>() {{
             put(source.zz, source);
         }};
-        Stack<CellNode> queue = new Stack<CellNode>() {{
+//        Stack<CellNode> queue = new Stack<CellNode>() {{
+//            add(source);
+//        }};
+        Queue<CellNode> queue = new LinkedList<CellNode>() {{
             add(source);
         }};
         Set<Integer> examinedNodes = new HashSet<>();
 
         while(!queue.isEmpty()) {
-            CellNode node = queue.pop();
-//            List<CellNode> neighbors = new ArrayList<>();
+            CellNode node = queue.remove();
             List<CellNode> neighbors = getNeighbors(node);
-//
-//            Cell tempNeighbor = new Cell(node.x, node.y+1);
-//            if(notWallAndNotTooFar(tempNeighbor) && !nodes.containsKey(tempNeighbor.zz))
-//                neighbors.add(new CellNode(tempNeighbor, getWeight(tempNeighbor)));
-//
-//            tempNeighbor = new Cell(node.x+1, node.y);
-//            if(notWallAndNotTooFar(tempNeighbor) && !nodes.containsKey(tempNeighbor.zz))
-//                neighbors.add(new CellNode(tempNeighbor, getWeight(tempNeighbor)));
-//
-//            tempNeighbor = new Cell(node.x, node.y-1);
-//            if(notWallAndNotTooFar(tempNeighbor) && !nodes.containsKey(tempNeighbor.zz))
-//                neighbors.add(new CellNode(tempNeighbor, getWeight(tempNeighbor)));
-//
-//            tempNeighbor = new Cell(node.x-1, node.y);
-//            if(notWallAndNotTooFar(tempNeighbor) && !nodes.containsKey(tempNeighbor.zz))
-//                neighbors.add(new CellNode(tempNeighbor, getWeight(tempNeighbor)));
 
             for(CellNode neighbor : neighbors) {
                 int nid = neighbor.zz;
                 if(!nodes.containsKey(nid))
                     nodes.put(nid, neighbor);
 
+                //relaxation
                 int newDistance = node.dist + neighbor.weight;
                 if(newDistance < nodes.get(nid).dist) {
                     nodes.get(nid).dist = newDistance;
                     nodes.get(nid).prev = node.zz;
 
+                    //infinite loop protection
                     if(!examinedNodes.contains(neighbor.zz)) {
                         queue.add(neighbor);
                         examinedNodes.add(neighbor.zz);
@@ -291,14 +279,6 @@ public class Board {
 
         if(enemies.contains(color)) return 1;
         else if(color == 0) return 2;
-        else return 4;
-    }
-
-    private int getWeight(Cell cell) {
-        int color = bb[cell.x][cell.y];
-
-        if(enemies.contains(color)) return 1;
-        else if(color == 0) return 2;
-        else return 4;
+        else return 64;
     }
 }
