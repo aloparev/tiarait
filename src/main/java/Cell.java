@@ -30,10 +30,6 @@ public class Cell {
 
     @Override
     public String toString() {
-        return "Cell{" +
-                "x=" + x +
-                ", y=" + y +
-                ", zz=" + zz +
-                '}';
+        return "Cell{" + x + "/" + y + " (" + zz + ")" + '}';
     }
 }

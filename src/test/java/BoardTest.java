@@ -84,4 +84,25 @@ public class BoardTest {
         assertEquals(ans, path);
         System.out.println(path);
     }
+
+    @Test
+    public void unfoldPath_44() {
+        int target = 44;
+        HashMap<Integer, CellNode> nodes = new HashMap<Integer, CellNode>() {{
+            put(44, new CellNode(target, 0, 0, -1));
+        }};
+        Stack<Integer> path = board.unfoldPath(target, target, nodes);
+        Stack<Integer> ans = new Stack<>();
+        assertEquals(ans, path);
+        System.out.println(path);
+    }
+
+    @Test
+    public void dijkstra_77_47() {
+        board.bb[13][1] = -1;
+        board.bb[14][1] = -1;
+
+        Stack<Integer> path = board.dijkstra(new Cell(13, 64), new Cell(15, 1));
+        System.out.println(path);
+    }
 }

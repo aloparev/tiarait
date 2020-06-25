@@ -32,12 +32,10 @@ public class Client {
             host = args[0];
             team = args[1];
         } else log.info("no args for host & team submitted, using defaults");
-        System.out.println("tiarait client up and running: host=" + host + " team=" + team);
+        System.out.println("\ttiarait client up and running: host=" + host + " team=" + team);
 
         float x, y;
-        float xr, yr;
-        Random rand = new Random();
-//        boolean switcher = true;
+        boolean gameRunning = false;
 
         NetworkClient nc = new NetworkClient(host, team);
         Board board = new Board(nc); // 0-3 (ACHTUNG! andere Nummerierung als beim ColorChange)
@@ -46,12 +44,13 @@ public class Client {
         Stack<Integer> pyramidStack = new Stack<>();
         Stack<Integer> eraserStack = new Stack<>();
 
-        //init obstacles
-        for(int i=0; i<Board.SIZE-1; i++) //x
-            for(int j=0; j<Board.SIZE-1; j++) //y
-                if(nc.isWall(i, j)) {
-//                    log.info(i + "/" + j + " isWall");
-                    board.bb[i][j] = Board.WALL;
+        log.info("init obstacles");
+        for(int yy=0; yy<Board.SIZE; yy++)
+            for (int xx = 0; xx < Board.SIZE; xx++)
+                if(nc.isWall(xx, yy)) {
+                    if(xx==12 && yy==1)
+                        log.info(xx + "/" + yy + " isWall");
+                    board.bb[xx][yy] = Board.WALL;
                 }
 
         /*
@@ -74,25 +73,26 @@ public class Client {
 */
         while (nc.isAlive()) {
             //eraser >> random
-            xr = (float) (rand.nextFloat() - .5);
-            yr = (float) (rand.nextFloat() - .5);
-            nc.setMoveDirection(ERASER, xr, yr);
-            log.info("xr=" + xr + " yr=" + yr);
+            if(gameRunning) {
+                nc.setMoveDirection(ERASER, board.getRandom(), board.getRandom());
+//                log.info("xr=" + xr + " yr=" + yr);
 //            log.info("x=" + x + " y=" + y + " | xr=" + xr + " yr=" + yr);
+            }
 
             //cube
             if(cubeStack.isEmpty()) {
                 cubeStack = board.getStack(CUBE);
-                log.info("cube stack init");
+                log.info("cube stack init: " + cubeStack);
+                nc.setMoveDirection(CUBE, 0, 0);
             }
-            else {
+            else if(gameRunning) {
                 int nextStep = cubeStack.pop();
                 Cell coords = board.getMoveVector(CUBE, nextStep);
                 nc.setMoveDirection(CUBE, coords.x, coords.y);
                 log.info("cube stack pop: " + coords);
             }
 
-            //manual control
+//            //manual control PYRAMID
 //            Scanner sc = new Scanner(System.in);
 //            try {
 //                x = Float.parseFloat(sc.nextLine());
@@ -101,19 +101,14 @@ public class Client {
 //                log.info("NumberFormatError: hold on");
 //                x=0; y=0;
 //            }
-//
-//            //manual walls inspection
-//            if(x>-1 && x<Board.SIZE && y>-1 && y<Board.SIZE)
-//                log.info("wall check for x/y: " + nc.isWall(Math.round(x), Math.round(y))); //true wenn bei Koordinate 7,11 ein Hindernis steht
-//
-////            pyramid
 //            nc.setMoveDirection(PYRAMID, x, y);
 
             // cc in eigene Struktur einarbeiten
             while ((cc = nc.getNextColorChange()) != null) {
-                board.bb[cc.x][cc.y] = cc.newColor;
+                gameRunning = true;
+                board.bb[cc.x][cc.y] = cc.newColor + 1;
 //                cc.newColor; //0 = leer, 1-4 = spieler
-                log.info("cc new color=" + cc.newColor + " cc.x=" + cc.x + " cc.y=" + cc.y);
+//                log.info("cc new color=" + cc.newColor + " cc.x=" + cc.x + " cc.y=" + cc.y);
             }
         }
     }

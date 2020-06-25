@@ -10,10 +10,12 @@ public class Board {
 
     int owner;
     TreeSet<Integer> enemies;
+    TreeSet<Integer> unreachable;
 //    int[] scores;
     int[][] bb;
     NetworkClient nc;
     CellNode middle; //middle of every path search to limit inspected area
+    Random rand;
 
     public Board(int owner) {
         this.owner = owner;
@@ -24,14 +26,16 @@ public class Board {
             add(4);
             remove(owner);
         }};
+        unreachable = new TreeSet<>();
 //        scores = new int[] {0, 0, 0, 0}; //plus init position
         bb = new int[SIZE][SIZE];
+        rand = new Random();
         initWalls();
         log.info("MyPlayerNumber=" + owner);
     }
 
     public Board(NetworkClient nc) {
-        this(nc.getMyPlayerNumber() + 1);
+        this(nc.getMyPlayerNumber());
         this.nc = nc;
     }
 
@@ -118,12 +122,16 @@ public class Board {
     }
 
     void printArena() {
-        for(int y=SIZE-1; y>-1; y--) { //x
+        for(int y=SIZE-1; y>-1; y--) {
             System.out.println();
-            for (int x = 0; x < SIZE; x++) { //y
+            for (int x = 0; x < SIZE; x++) {
                 System.out.printf("%2d ", bb[x][y]);
             }
         }
+    }
+
+    float getRandom() {
+        return (float) (rand.nextFloat() - .5);
     }
 
     double getDistance(Cell source, Cell target, boolean manhattan) {
@@ -157,10 +165,16 @@ public class Board {
 
             //find the next cell from someone else
             case 1:
-                for(int i=0; i<Board.SIZE; i++) //x
-                    for(int j=0; j<Board.SIZE; j++) //y
-                        if(notWall(i, j) && bb[i][j] != owner)
-                            return new Cell(i, j);
+//                for(int i=0; i<Board.SIZE; i++) //x
+//                    for(int j=0; j<Board.SIZE; j++) //y
+//                        if(notWall(i, j) && bb[i][j] != owner)
+//                            return new Cell(i, j);
+                for(int y=0; y<SIZE; y++) {
+                    for (int x = 0; x < SIZE; x++) {
+                        if (notWall(x, y) && bb[x][y] != owner)
+                            return new Cell(x, y);
+                    }
+                }
             case 2:
             default: return getCoords(bot);
         }
@@ -226,14 +240,34 @@ public class Board {
         return new CellNode(x, y, weight);
     }
 
-    Stack<Integer> unfoldPath(int source, int target, HashMap<Integer, CellNode> data) {
+    Stack<Integer> unfoldPath(int source, int target, HashMap<Integer, CellNode> nodes) {
+        log.info("unfolding: source=" + source + ", target=" + target + ", nodes=" + nodes);
+        if(nodes.size() == 1)
+            markAsWallAndReturnRandom(target);
+
         Stack<Integer> path = new Stack<>();
-        do {
-            if(target != source) //get rid of current position
-                path.push(target);
-            target = data.get(target).prev;
-        } while(target != -1);
+
+        try {
+            do {
+                if (target != source) { //get rid of current position
+                    path.push(target);
+                    target = nodes.get(target).prev;
+                }
+            } while (nodes.get(target).prev != -1);
+        } catch (NullPointerException ee) {
+            return markAsWallAndReturnRandom(target);
+        }
         return path;
+    }
+
+    Stack<Integer> markAsWallAndReturnRandom(int zz) {
+        int x = Logic.getX(zz);
+        int y = Logic.getY(zz);
+        bb[x][y] = WALL;
+
+        return new Stack<Integer>() {{
+            add(Logic.getZz(getRandom(), getRandom()));
+        }};
     }
 
     /**
@@ -263,7 +297,10 @@ public class Board {
     }
 
     private boolean notWall(int x, int y) {
-        return bb[x][y] != -1;
+        if(x > -1 && x < SIZE && y > -1 && y < SIZE)
+            return bb[x][y] != -1;
+        else
+            return false;
     }
 
     private boolean isReasonable(int x, int y) {
