@@ -110,13 +110,13 @@ public class Client {
                     position = board.getCoords(CUBE).zz;
                     move = board.getMoveVector(CUBE, zz);
 
-                    if(lastPosition == position) {
-                        board.sendRandomly(CUBE);
-                        log.info("RANDOM: move=" + move + " lastMove=" + lastMove + " position=" + position + " lastPosition" + lastPosition);
-                    }
+//                    if(lastPosition == position) {
+//                        board.sendRandomly(CUBE);
+//                        log.info("RANDOM");
+//                    }
 //                    else {
                         nc.setMoveDirection(CUBE, move.x, move.y);
-                        log.info("REAL: move=" + move + " lastMove=" + lastMove + " position=" + position + " lastPosition" + lastPosition);
+                        log.info("REAL: position=" + position + " lastPosition" + lastPosition + " target=" + zz);
 //                    }
                 }
                 board.stop(CUBE);
@@ -135,7 +135,7 @@ public class Client {
 
             while ((cc = nc.getNextColorChange()) != null) {
                 gameRunning = true;
-                board.bb[cc.x][cc.y] = cc.newColor + 1;
+                board.bb[cc.x][cc.y] = cc.newColor - 1;
                 log.info("cc update: bb[" + cc.x + "][" + cc.y + "] = " + cc.newColor);
             }
         }

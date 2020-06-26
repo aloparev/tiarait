@@ -130,6 +130,10 @@ public class Board {
         }
     }
 
+    void printCellColor(int x, int y) {
+        System.out.println("owner=" + owner + " | bb[" + x + "][" + y + "]=" + bb[x][y]);
+    }
+
     float getRandom() {
         return (float) (rand.nextFloat() - .5);
     }
@@ -162,9 +166,28 @@ public class Board {
         return getDistanceEuclid(Logic.getCellFromZz(source), Logic.getCellFromZz(target));
     }
 
-    Cell getMoveVector(int bot, int target) {
+    Cell getMoveVector(int bot, int targetInit) {
         Cell source = getCoords(bot);
-        return new Cell(Logic.getX(target) - source.x, Logic.getY(target) - source.y);
+        Cell target = Logic.getCellFromZz(targetInit);
+        Cell ans = new Cell(0, 0);
+
+        //up
+        if(target.y > source.y)
+            ans = new Cell(0, 1);
+
+        //right
+        if(target.x > source.x)
+            ans = new Cell(1, 0);
+
+        //down
+        if(target.y < source.y)
+            ans = new Cell(0, -1);
+
+        //left
+        if(target.x < source.x)
+            ans = new Cell(-1, 0);
+
+        return ans;
     }
 
     Cell getMoveVector(float sourceX, float sourceY, int target) {
@@ -192,6 +215,7 @@ public class Board {
                 for(int y=0; y<SIZE; y++) {
                     for (int x = 0; x < SIZE; x++) {
                         if (notWall(x, y) && bb[x][y] != owner) {
+                            printCellColor(x, y);
                             log.info("cube target = " + x + "/" + y);
                             return new Cell(x, y);
                         }
