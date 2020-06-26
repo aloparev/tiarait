@@ -2,7 +2,6 @@ import lenz.htw.tiarait.ColorChange;
 import lenz.htw.tiarait.net.NetworkClient;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.Random;
 import java.util.Scanner;
 import java.util.Stack;
 
@@ -44,6 +43,13 @@ public class Client {
         Stack<Integer> pyramidStack = new Stack<>();
         Stack<Integer> eraserStack = new Stack<>();
 
+        Cell move = null;
+        Cell lastMove = null;
+        int position = -1;
+        int lastPosition;
+        int stack = -1;
+        int lastStack = -1;
+
         log.info("init obstacles");
         for(int yy=0; yy<Board.SIZE; yy++)
             for (int xx = 0; xx < Board.SIZE; xx++)
@@ -74,7 +80,7 @@ public class Client {
         while (nc.isAlive()) {
             //eraser >> random
             if(gameRunning) {
-                nc.setMoveDirection(ERASER, board.getRandom(), board.getRandom());
+                board.sendRandomly(ERASER);
 //                log.info("xr=" + xr + " yr=" + yr);
 //            log.info("x=" + x + " y=" + y + " | xr=" + xr + " yr=" + yr);
             }
@@ -82,17 +88,41 @@ public class Client {
             //cube
             if(cubeStack.isEmpty()) {
                 cubeStack = board.getStack(CUBE);
+//
+//                if(cubeStack.size() == 1) {
+//                    lastStack = stack;
+//                    stack = cubeStack.peek();
+//                }
+//
+//                if(lastStack == stack)
+                board.sendRandomly(CUBE);
+
                 log.info("cube stack init: " + cubeStack);
-                nc.setMoveDirection(CUBE, 0, 0);
+                board.stop(CUBE);
             }
             else if(gameRunning) {
-                int nextStep = cubeStack.pop();
-                Cell coords = board.getMoveVector(CUBE, nextStep);
-                nc.setMoveDirection(CUBE, coords.x, coords.y);
-                log.info("cube stack pop: " + coords);
+                log.info("cube stack: " + cubeStack);
+                int zz = cubeStack.pop();
+
+                while(board.getDistanceEuclid(board.getCoords(CUBE), Logic.getCellFromZz(zz)) > 1) {
+//                    lastMove = move;
+                    lastPosition = position;
+                    position = board.getCoords(CUBE).zz;
+                    move = board.getMoveVector(CUBE, zz);
+
+                    if(lastPosition == position) {
+                        board.sendRandomly(CUBE);
+                        log.info("RANDOM: move=" + move + " lastMove=" + lastMove + " position=" + position + " lastPosition" + lastPosition);
+                    }
+//                    else {
+                        nc.setMoveDirection(CUBE, move.x, move.y);
+                        log.info("REAL: move=" + move + " lastMove=" + lastMove + " position=" + position + " lastPosition" + lastPosition);
+//                    }
+                }
+                board.stop(CUBE);
             }
 
-//            //manual control PYRAMID
+            //manual control PYRAMID
 //            Scanner sc = new Scanner(System.in);
 //            try {
 //                x = Float.parseFloat(sc.nextLine());
@@ -103,12 +133,10 @@ public class Client {
 //            }
 //            nc.setMoveDirection(PYRAMID, x, y);
 
-            // cc in eigene Struktur einarbeiten
             while ((cc = nc.getNextColorChange()) != null) {
                 gameRunning = true;
                 board.bb[cc.x][cc.y] = cc.newColor + 1;
-//                cc.newColor; //0 = leer, 1-4 = spieler
-//                log.info("cc new color=" + cc.newColor + " cc.x=" + cc.x + " cc.y=" + cc.y);
+                log.info("cc update: bb[" + cc.x + "][" + cc.y + "] = " + cc.newColor);
             }
         }
     }

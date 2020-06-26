@@ -1,3 +1,5 @@
+import java.util.Objects;
+
 /**
  * cell holds only field coordinates
  * including unique id
@@ -30,6 +32,6 @@ public class Cell {
 
     @Override
     public String toString() {
-        return "Cell{" + x + "/" + y + " (" + zz + ")" + '}';
+        return "[" + x + "/" + y + " (" + zz + ")]";
     }
 }

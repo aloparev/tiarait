@@ -1,4 +1,3 @@
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -47,7 +46,7 @@ public class BoardTest {
 
     @Test
     public void getManhattanDistance() {
-        assertEquals(2, board.getDistance(new Cell(12, 29), new Cell(11, 28), true), DELTA);
+        assertEquals(2, board.getDistanceManhattan(new Cell(12, 29), new Cell(11, 28)), DELTA);
     }
 
     @Test
@@ -98,11 +97,20 @@ public class BoardTest {
     }
 
     @Test
-    public void dijkstra_77_47() {
-        board.bb[13][1] = -1;
-        board.bb[14][1] = -1;
+    public void dijkstra_44() {
+        board.bb[14][2] = board.owner;
+        board.bb[13][2] = board.owner;
+        board.bb[12][2] = board.owner;
+        board.bb[12][1] = board.owner;
+        board.bb[13][1] = board.WALL;
+        board.bb[11][1] = board.WALL;
 
-        Stack<Integer> path = board.dijkstra(new Cell(13, 64), new Cell(15, 1));
+        Stack<Integer> path = board.dijkstra(Logic.getCellFromZz(44), Logic.getCellFromZz(46));
         System.out.println(path);
+    }
+
+    @Test
+    public void distanceEuclid() {
+        System.out.println(board.getDistanceEuclid(622, 622));
     }
 }

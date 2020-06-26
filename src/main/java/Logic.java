@@ -12,6 +12,10 @@ public class Logic {
         return (int) (x + Board.SIZE * y);
     }
 
+    static Cell getCellFromZz(int zz) {
+        return new Cell(getX(zz), getY(zz));
+    }
+
     static Cell getXy(int zz) {
         return new Cell(zz % Board.SIZE, zz / Board.SIZE);
     }

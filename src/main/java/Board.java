@@ -134,12 +134,32 @@ public class Board {
         return (float) (rand.nextFloat() - .5);
     }
 
-    double getDistance(Cell source, Cell target, boolean manhattan) {
+    void stop(int bot) {
+        nc.setMoveDirection(bot, 0, 0);
+    }
+
+    void sendRandomly(int bot) {
+        nc.setMoveDirection(bot, getRandom(), getRandom());
+    }
+
+    double getDistanceManhattan(Cell source, Cell target) {
         double xd = Math.abs(target.x-source.x);
         double yd = Math.abs(target.y-source.y);
+        return xd + yd;
+    }
 
-        if(manhattan) return xd + yd;
+    double getDistanceManhattan(int source, int target) {
+        return getDistanceManhattan(Logic.getCellFromZz(source), Logic.getCellFromZz(target));
+    }
+
+    double getDistanceEuclid(Cell source, Cell target) {
+        double xd = Math.abs(target.x-source.x);
+        double yd = Math.abs(target.y-source.y);
         return Math.hypot(xd, yd);
+    }
+
+    double getDistanceEuclid(int source, int target) {
+        return getDistanceEuclid(Logic.getCellFromZz(source), Logic.getCellFromZz(target));
     }
 
     Cell getMoveVector(int bot, int target) {
@@ -171,8 +191,10 @@ public class Board {
 //                            return new Cell(i, j);
                 for(int y=0; y<SIZE; y++) {
                     for (int x = 0; x < SIZE; x++) {
-                        if (notWall(x, y) && bb[x][y] != owner)
+                        if (notWall(x, y) && bb[x][y] != owner) {
+                            log.info("cube target = " + x + "/" + y);
                             return new Cell(x, y);
+                        }
                     }
                 }
             case 2:
@@ -241,9 +263,8 @@ public class Board {
     }
 
     Stack<Integer> unfoldPath(int source, int target, HashMap<Integer, CellNode> nodes) {
-        log.info("unfolding: source=" + source + ", target=" + target + ", nodes=" + nodes);
-        if(nodes.size() == 1)
-            markAsWallAndReturnRandom(target);
+//        if(nodes.size() == 1)
+//            markAsWallAndReturnRandom(target);
 
         Stack<Integer> path = new Stack<>();
 
@@ -257,6 +278,8 @@ public class Board {
         } catch (NullPointerException ee) {
             return markAsWallAndReturnRandom(target);
         }
+
+        log.info("unfolding: source=" + source + ", target=" + target + ", path=" + path);
         return path;
     }
 
@@ -304,7 +327,7 @@ public class Board {
     }
 
     private boolean isReasonable(int x, int y) {
-        return getDistance(new Cell(x, y), middle, true) < middle.weight * 2;
+        return getDistanceManhattan(new Cell(x, y), middle) < middle.weight * 2;
     }
 
     private CellNode createNode(int x, int y) {
