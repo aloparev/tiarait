@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.Scanner;
 import java.util.Stack;
+import java.util.concurrent.TimeUnit;
 
 /**
  * player colors
@@ -23,7 +24,7 @@ public class Client {
     public static final int CUBE = 1;
     public static final int PYRAMID = 2;
 
-    public static void main( String[] args ) {
+    public static void main( String[] args ) throws InterruptedException {
         String team = "fox";
         String host = "127.0.0.1";
 
@@ -50,14 +51,7 @@ public class Client {
         int stack = -1;
         int lastStack = -1;
 
-        log.info("init obstacles");
-        for(int yy=0; yy<Board.SIZE; yy++)
-            for (int xx = 0; xx < Board.SIZE; xx++)
-                if(nc.isWall(xx, yy)) {
-                    if(xx==12 && yy==1)
-                        log.info(xx + "/" + yy + " isWall");
-                    board.bb[xx][yy] = Board.WALL;
-                }
+
 
         /*
         log.info("testing enemy location, [1-4].bots");
@@ -110,16 +104,17 @@ public class Client {
                     position = board.getCoords(CUBE).zz;
                     move = board.getMoveVector(CUBE, zz);
 
-//                    if(lastPosition == position) {
-//                        board.sendRandomly(CUBE);
-//                        log.info("RANDOM");
-//                    }
-//                    else {
+                    if(lastPosition == position) {
+                        board.sendRandomly(CUBE);
+                        log.info("RANDOM");
+                    }
+                    else {
                         nc.setMoveDirection(CUBE, move.x, move.y);
                         log.info("REAL: position=" + position + " lastPosition" + lastPosition + " target=" + zz);
-//                    }
+                    }
+                    TimeUnit.MILLISECONDS.sleep(800);
                 }
-                board.stop(CUBE);
+//                board.stop(CUBE);
             }
 
             //manual control PYRAMID
@@ -132,6 +127,7 @@ public class Client {
 //                x=0; y=0;
 //            }
 //            nc.setMoveDirection(PYRAMID, x, y);
+//                log.info("pyramyd coords: " + board.getCoords(PYRAMID));
 
             while ((cc = nc.getNextColorChange()) != null) {
                 gameRunning = true;

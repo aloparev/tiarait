@@ -3,6 +3,10 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.*;
 
+/**
+ * direction scrutiny is always clockwise,
+ * beginning at 12
+ */
 @Slf4j
 public class Board {
     static final int SIZE = 32;
@@ -19,6 +23,8 @@ public class Board {
 
     public Board(int owner) {
         this.owner = owner;
+        log.info("MyPlayerNumber=" + owner);
+
         enemies = new TreeSet<Integer>() {{
             add(1);
             add(2);
@@ -26,17 +32,42 @@ public class Board {
             add(4);
             remove(owner);
         }};
-        unreachable = new TreeSet<>();
+//        unreachable = new TreeSet<>();
 //        scores = new int[] {0, 0, 0, 0}; //plus init position
         bb = new int[SIZE][SIZE];
         rand = new Random();
         initWalls();
-        log.info("MyPlayerNumber=" + owner);
+        initObstacles();
     }
 
     public Board(NetworkClient nc) {
         this(nc.getMyPlayerNumber());
         this.nc = nc;
+    }
+
+    /**
+     * marks obstacles within arena,
+     * including badly accessible cells
+     */
+    void initObstacles() {
+        log.info("init obstacles");
+        for(int yy=0; yy<Board.SIZE; yy++)
+            for (int xx = 0; xx < Board.SIZE; xx++)
+                if(nc.isWall(xx, yy) || moreThanOneWallNearby(xx, yy)) {
+                    bb[xx][yy] = Board.WALL;
+                }
+        printArena();
+    }
+
+    boolean moreThanOneWallNearby(int x, int y) {
+        int walls = 0;
+
+        if(bb[x][y+1] == -1) walls++;
+        if(bb[x+1][y] == -1) walls++;
+        if(bb[x][y-1] == -1) walls++;
+        if(bb[x-1][y] == -1) walls++;
+
+        return walls > 1;
     }
 
     /**
@@ -146,6 +177,22 @@ public class Board {
         nc.setMoveDirection(bot, getRandom(), getRandom());
     }
 
+    void detachFromWall(int bot) {
+        Cell pos = getCoords(bot);
+
+//        if(nc.isWall(pos.x, pos.y+1))
+            nc.setMoveDirection(bot, 0, -1);
+
+//        if(nc.isWall(pos.x+1, pos.y))
+            nc.setMoveDirection(bot, -1, 0);
+
+//        if(nc.isWall(pos.x, pos.y-1))
+            nc.setMoveDirection(bot, 0, 1);
+
+//        if(nc.isWall(pos.x-1, pos.y))
+            nc.setMoveDirection(bot, 1, 0);
+    }
+
     double getDistanceManhattan(Cell source, Cell target) {
         double xd = Math.abs(target.x-source.x);
         double yd = Math.abs(target.y-source.y);
@@ -167,26 +214,47 @@ public class Board {
     }
 
     Cell getMoveVector(int bot, int targetInit) {
-        Cell source = getCoords(bot);
-        Cell target = Logic.getCellFromZz(targetInit);
-        Cell ans = new Cell(0, 0);
+        Cell so = getCoords(bot);
+        Cell ta = Logic.getCellFromZz(targetInit);
+        Cell ans = new Cell(getRandom(), getRandom());
 
         //up
-        if(target.y > source.y)
+        if(ta.y > so.y)
             ans = new Cell(0, 1);
 
         //right
-        if(target.x > source.x)
+        if(ta.x > so.x)
             ans = new Cell(1, 0);
 
         //down
-        if(target.y < source.y)
+        if(ta.y < so.y)
             ans = new Cell(0, -1);
 
         //left
-        if(target.x < source.x)
+        if(ta.x < so.x)
             ans = new Cell(-1, 0);
 
+        //top right corner
+        if ((ta.x == so.x - 1 && ta.y == so.y + 1)
+                || (ta.x == so.x + 1 && ta.y == so.y - 1))
+            ans = new Cell(1, 1);
+
+        //bottom right corner
+        if ((ta.x == so.x - 1 && ta.y == so.y - 1)
+                || (ta.x == so.x + 1 && ta.y == so.y + 1))
+            ans = new Cell(1, -1);
+
+        //bottom left corner
+        if ((ta.x == so.x + 1 && ta.y == so.y - 1)
+                || (ta.x == so.x - 1 && ta.y == so.y + 1))
+            ans = new Cell(1, 1);
+
+        //top left corner
+        if ((ta.x == so.x + 1 && ta.y == so.y + 1)
+                || (ta.x == so.x - 1 && ta.y == so.y - 1))
+            ans = new Cell(1, -1);
+
+        log.info("getMoveVector: move=" + ans);
         return ans;
     }
 
