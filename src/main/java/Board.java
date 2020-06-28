@@ -67,7 +67,7 @@ public class Board {
         if (rangeOk(x, y-1) && nc.isWall(x, y - 1)) walls++;
         if (rangeOk(x-1, y) && nc.isWall(x - 1, y)) walls++;
 
-        log.info("walls around: " + x + "/" + y + " (" + Logic.getZz(x, y) + ") >> " + walls);
+//        log.info("walls around: " + x + "/" + y + " (" + Logic.getZz(x, y) + ") >> " + walls);
         return walls > 1;
     }
 
@@ -187,10 +187,6 @@ public class Board {
         double xd = Math.abs(target.x-source.x);
         double yd = Math.abs(target.y-source.y);
         return xd + yd;
-    }
-
-    double getDistanceManhattan(int source, int target) {
-        return getDistanceManhattan(Logic.getCellFromZz(source), Logic.getCellFromZz(target));
     }
 
     double getDistanceEuclid(Cell source, Cell target) {
