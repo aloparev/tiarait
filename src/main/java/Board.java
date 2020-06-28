@@ -233,14 +233,14 @@ public class Board {
         //bottom left corner
         if ((ta.x == so.x + 1 && ta.y == so.y - 1)
                 || (ta.x == so.x - 1 && ta.y == so.y + 1))
-            ans = new Cell(1, 1);
+            ans = new Cell(-1, -1);
 
         //top left corner
         if ((ta.x == so.x + 1 && ta.y == so.y + 1)
                 || (ta.x == so.x - 1 && ta.y == so.y - 1))
-            ans = new Cell(1, -1);
+            ans = new Cell(-1, 1);
 
-        log.info("getMoveVector: move=" + ans);
+//        log.info("getMoveVector: move=" + ans);
         return ans;
     }
 
@@ -251,13 +251,25 @@ public class Board {
     Cell findTarget(int bot) {
         switch (bot) {
             case 0:
+                int xStart, xEnd;
+                int yStart, yEnd;
+                Cell pos = getCoords(bot);
 
-            //find the next cell from someone else
+                for(int i=4; i<SIZE; i+=4) {
+                    xStart = Math.max(pos.x - i, 0);
+                    xEnd = Math.min(pos.x + i, SIZE);
+                    yStart = Math.max(pos.y - i, 0);
+                    yEnd = Math.min(pos.y + i, SIZE);
+
+                    for(int y=yStart; y<yEnd; y++)
+                        for(int x=xStart; x<xEnd; x++)
+                            if(enemies.contains(bb[x][y])) {
+                                log.info("eraser target = " + x + "/" + y);
+                                return createNode(x, y);
+                            }
+                }
+
             case 1:
-//                for(int i=0; i<Board.SIZE; i++) //x
-//                    for(int j=0; j<Board.SIZE; j++) //y
-//                        if(notWall(i, j) && bb[i][j] != owner)
-//                            return new Cell(i, j);
                 for(int y=0; y<SIZE; y++) {
                     for (int x = 0; x < SIZE; x++) {
                         if (notWall(x, y) && bb[x][y] != owner) {
@@ -335,44 +347,6 @@ public class Board {
         return ans;
     }
 
-    CellNode getMiddle(Cell sourceInit, Cell targetInit) {
-        int x = (sourceInit.x + targetInit.x) / 2;
-        int y = (sourceInit.y + targetInit.y) / 2;
-        int xd = Math.abs(targetInit.x - sourceInit.x);
-        int yd = Math.abs(targetInit.y - sourceInit.y);
-        int weight = Math.max(xd, yd);
-        return new CellNode(x, y, weight);
-    }
-
-    Stack<Integer> unfoldPath(int source, int target, HashMap<Integer, CellNode> nodes) {
-        Stack<Integer> path = new Stack<>();
-
-        try {
-            do {
-                if (target != source) { //get rid of current position
-                    path.push(target);
-                    target = nodes.get(target).prev;
-                }
-            } while (nodes.get(target).prev != -1);
-        } catch (NullPointerException ee) {
-            log.info("unfoldPath NullPointer");
-            return markAsWallAndReturnRandom(target);
-        }
-
-        log.info("unfolding: source=" + source + ", target=" + target + ", path=" + path);
-        return path;
-    }
-
-    Stack<Integer> markAsWallAndReturnRandom(int zz) {
-        int x = Logic.getX(zz);
-        int y = Logic.getY(zz);
-        bb[x][y] = WALL;
-
-        return new Stack<Integer>() {{
-            add(Logic.getZz(getRandom(), getRandom()));
-        }};
-    }
-
     private boolean notWallAndNotTooFar(int x, int y) {
         return notWall(x, y) && isReasonable(x, y);
     }
@@ -388,6 +362,44 @@ public class Board {
         return getDistanceManhattan(new Cell(x, y), middle) < middle.weight * 2;
     }
 
+    CellNode getMiddle(Cell sourceInit, Cell targetInit) {
+        int x = (sourceInit.x + targetInit.x) / 2;
+        int y = (sourceInit.y + targetInit.y) / 2;
+        int xd = Math.abs(targetInit.x - sourceInit.x);
+        int yd = Math.abs(targetInit.y - sourceInit.y);
+        int weight = Math.max(xd, yd);
+        return new CellNode(x, y, weight);
+    }
+
+    Stack<Integer> unfoldPath(int source, int target, HashMap<Integer, CellNode> nodes) {
+        Stack<Integer> path = new Stack<>();
+
+//        try {
+            do {
+                if (target != source) { //get rid of current position
+                    path.push(target);
+                    target = nodes.get(target).prev;
+                }
+            } while (nodes.get(target).prev != -1);
+//        } catch (NullPointerException ee) {
+//            log.info("unfoldPath NullPointer");
+//            return markAsWallAndReturnRandom(target);
+//        }
+
+//        log.info("unfolding: source=" + source + ", target=" + target + ", path=" + path);
+        return path;
+    }
+
+    Stack<Integer> markAsWallAndReturnRandom(int zz) {
+        int x = Logic.getX(zz);
+        int y = Logic.getY(zz);
+        bb[x][y] = WALL;
+
+        return new Stack<Integer>() {{
+            add(Logic.getZz(getRandom(), getRandom()));
+        }};
+    }
+
     private CellNode createNode(int x, int y) {
         return new CellNode(x, y, getWeight(x, y));
     }
@@ -396,7 +408,7 @@ public class Board {
         int color = bb[x][y];
 
         if(enemies.contains(color)) return 1;
-        else if(color == 0) return 2;
-        else return 64;
+        else if(color == 0) return 10;
+        else return 100;
     }
 }

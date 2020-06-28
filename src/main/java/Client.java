@@ -50,14 +50,33 @@ public class Client {
         Cell move = null;
         int position = -1;
         int lastPosition;
+        int zz;
 
         while (nc.isAlive()) {
-            //eraser >> random
-            if(gameRunning) {
-                board.sendRandomly(ERASER);
-//                log.info("xr=" + xr + " yr=" + yr);
-//            log.info("x=" + x + " y=" + y + " | xr=" + xr + " yr=" + yr);
-            }
+            //eraser
+//            if(eraserStack.isEmpty()) {
+//                eraserStack = board.analyseAndGetStack(ERASER);
+//                board.stop(ERASER);
+//                log.info("eraser stack init: " + cubeStack);
+//            }
+//            else if(gameRunning) {
+//                log.info("eraser stack: " + cubeStack);
+//                zz = eraserStack.pop();
+//
+//                while(board.getDistanceEuclid(board.getCoords(ERASER), Logic.getCellFromZz(zz)) > 1) {
+//                    lastPosition = position;
+//                    position = board.getCoords(ERASER).zz;
+//                    move = board.getMoveVector(ERASER, zz);
+//
+//                    if(lastPosition == position) {
+//                        board.sendRandomly(ERASER);
+//                    }
+//                    else {
+//                        nc.setMoveDirection(ERASER, move.x, move.y);
+//                    }
+//                    TimeUnit.MILLISECONDS.sleep(CUBE_DELAY);
+//                }
+//            }
 
             //cube
             if(cubeStack.isEmpty()) {
@@ -68,7 +87,7 @@ public class Client {
             }
             else if(gameRunning) {
                 log.info("cube stack: " + cubeStack);
-                int zz = cubeStack.pop();
+                zz = cubeStack.pop();
 
                 while(board.getDistanceEuclid(board.getCoords(CUBE), Logic.getCellFromZz(zz)) > 1) {
                     lastPosition = position;
@@ -77,11 +96,11 @@ public class Client {
 
                     if(lastPosition == position) {
                         board.sendRandomly(CUBE);
-                        log.info("RANDOM");
+//                        log.info("CUBE RANDOM");
                     }
                     else {
                         nc.setMoveDirection(CUBE, move.x, move.y);
-                        log.info("REAL: position=" + position + " lastPosition" + lastPosition + " target=" + zz);
+                        log.info("CUBE REAL: position=" + position + " lastPosition" + lastPosition + " target=" + zz);
                     }
                     TimeUnit.MILLISECONDS.sleep(CUBE_DELAY);
                 }
@@ -103,7 +122,7 @@ public class Client {
             while ((cc = nc.getNextColorChange()) != null) {
                 gameRunning = true;
                 board.bb[cc.x][cc.y] = cc.newColor - 1;
-                log.info("cc update: bb[" + cc.x + "][" + cc.y + "] = " + cc.newColor);
+//                log.info("cc update: bb[" + cc.x + "][" + cc.y + "] = " + cc.newColor);
             }
         }
     }

@@ -17,4 +17,4 @@ java -Djava.library.path=repo/htw/ai/lenz/tiarait-server/2/lib/native/ -jar repo
 java -jar target/TiaraitClient.jar ${host} ${player1} > /dev/null 2>&1 &
 java -jar target/TiaraitClient.jar ${host} ${player2} > /dev/null 2>&1 &
 java -jar target/TiaraitClient.jar ${host} ${player3} > /dev/null 2>&1 &
-echo "dummy clients started"
+echo "$(date) dummy clients started"
