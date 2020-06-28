@@ -4,8 +4,8 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.*;
 
 /**
- * direction scrutiny is always clockwise,
- * beginning at 12
+ * board-brain class
+ * when inspecting cells, the direction is always clockwise: 12-3-6-9
  */
 @Slf4j
 public class Board {
@@ -37,12 +37,12 @@ public class Board {
         bb = new int[SIZE][SIZE];
         rand = new Random();
         initWalls();
-        initObstacles();
     }
 
     public Board(NetworkClient nc) {
         this(nc.getMyPlayerNumber());
         this.nc = nc;
+        initObstacles();
     }
 
     /**
@@ -50,24 +50,29 @@ public class Board {
      * including badly accessible cells
      */
     void initObstacles() {
-        log.info("init obstacles");
-        for(int yy=0; yy<Board.SIZE; yy++)
-            for (int xx = 0; xx < Board.SIZE; xx++)
-                if(nc.isWall(xx, yy) || moreThanOneWallNearby(xx, yy)) {
-                    bb[xx][yy] = Board.WALL;
-                }
+//        log.info("init obstacles");
+        for(int yy=1; yy<Board.SIZE-1; yy++)
+            for (int xx=1; xx < Board.SIZE-1; xx++) {
+                if(nc.isWall(xx, yy)) bb[xx][yy] = Board.WALL;
+                if(!nc.isWall(xx, yy) && moreThanTwoWallsAround(xx, yy)) bb[xx][yy] = Board.WALL;
+            }
         printArena();
     }
 
-    boolean moreThanOneWallNearby(int x, int y) {
+    boolean moreThanTwoWallsAround(int x, int y) {
         int walls = 0;
 
-        if(bb[x][y+1] == -1) walls++;
-        if(bb[x+1][y] == -1) walls++;
-        if(bb[x][y-1] == -1) walls++;
-        if(bb[x-1][y] == -1) walls++;
+        if (rangeOk(x, y+1) && nc.isWall(x, y + 1)) walls++;
+        if (rangeOk(x+1, y) && nc.isWall(x + 1, y)) walls++;
+        if (rangeOk(x, y-1) && nc.isWall(x, y - 1)) walls++;
+        if (rangeOk(x-1, y) && nc.isWall(x - 1, y)) walls++;
 
+        log.info("walls around: " + x + "/" + y + " (" + Logic.getZz(x, y) + ") >> " + walls);
         return walls > 1;
+    }
+
+    boolean rangeOk(int x, int y) {
+        return x >= 0 && x < SIZE && y >= 0 && y < SIZE;
     }
 
     /**
@@ -159,10 +164,11 @@ public class Board {
                 System.out.printf("%2d ", bb[x][y]);
             }
         }
+        System.out.println();
     }
 
     void printCellColor(int x, int y) {
-        System.out.println("owner=" + owner + " | bb[" + x + "][" + y + "]=" + bb[x][y]);
+        log.info("printCellColor: owner=" + owner + " | bb[" + x + "][" + y + "]=" + bb[x][y]);
     }
 
     float getRandom() {
@@ -175,22 +181,6 @@ public class Board {
 
     void sendRandomly(int bot) {
         nc.setMoveDirection(bot, getRandom(), getRandom());
-    }
-
-    void detachFromWall(int bot) {
-        Cell pos = getCoords(bot);
-
-//        if(nc.isWall(pos.x, pos.y+1))
-            nc.setMoveDirection(bot, 0, -1);
-
-//        if(nc.isWall(pos.x+1, pos.y))
-            nc.setMoveDirection(bot, -1, 0);
-
-//        if(nc.isWall(pos.x, pos.y-1))
-            nc.setMoveDirection(bot, 0, 1);
-
-//        if(nc.isWall(pos.x-1, pos.y))
-            nc.setMoveDirection(bot, 1, 0);
     }
 
     double getDistanceManhattan(Cell source, Cell target) {
@@ -258,15 +248,7 @@ public class Board {
         return ans;
     }
 
-    Cell getMoveVector(float sourceX, float sourceY, int target) {
-        return new Cell(Logic.getX(target) - sourceX, Logic.getY(target) - sourceY);
-    }
-
-    Stack<Integer> getStack(int bot) {
-        return evaluate(bot);
-    }
-
-    Stack<Integer> evaluate(int bot) {
+    Stack<Integer> analyseAndGetStack(int bot) {
         return dijkstra(getCoords(bot), findTarget(bot));
     }
 
@@ -310,9 +292,6 @@ public class Board {
         HashMap<Integer, CellNode> nodes = new HashMap<Integer, CellNode>() {{
             put(source.zz, source);
         }};
-//        Stack<CellNode> queue = new Stack<CellNode>() {{
-//            add(source);
-//        }};
         Queue<CellNode> queue = new LinkedList<CellNode>() {{
             add(source);
         }};
@@ -345,6 +324,21 @@ public class Board {
         return unfoldPath(source.zz, target.zz, nodes);
     }
 
+    List<CellNode> getNeighbors(Cell source) {
+        List<CellNode> ans = new ArrayList<>();
+
+        if(notWallAndNotTooFar(source.x, source.y+1))
+            ans.add(createNode(source.x, source.y+1));
+        if(notWallAndNotTooFar(source.x+1, source.y))
+            ans.add(createNode(source.x+1, source.y));
+        if(notWallAndNotTooFar(source.x, source.y-1))
+            ans.add(createNode(source.x, source.y-1));
+        if(notWallAndNotTooFar(source.x-1, source.y))
+            ans.add(createNode(source.x-1, source.y));
+
+        return ans;
+    }
+
     CellNode getMiddle(Cell sourceInit, Cell targetInit) {
         int x = (sourceInit.x + targetInit.x) / 2;
         int y = (sourceInit.y + targetInit.y) / 2;
@@ -355,9 +349,6 @@ public class Board {
     }
 
     Stack<Integer> unfoldPath(int source, int target, HashMap<Integer, CellNode> nodes) {
-//        if(nodes.size() == 1)
-//            markAsWallAndReturnRandom(target);
-
         Stack<Integer> path = new Stack<>();
 
         try {
@@ -368,6 +359,7 @@ public class Board {
                 }
             } while (nodes.get(target).prev != -1);
         } catch (NullPointerException ee) {
+            log.info("unfoldPath NullPointer");
             return markAsWallAndReturnRandom(target);
         }
 
@@ -385,34 +377,12 @@ public class Board {
         }};
     }
 
-    /**
-     * clockwise from 12 to 3 to 6 and 9
-     */
-    List<CellNode> getNeighbors(Cell source) {
-        List<CellNode> ans = new ArrayList<>();
-
-        if(notWallAndNotTooFar(source.x, source.y+1))
-            ans.add(createNode(source.x, source.y+1));
-        if(notWallAndNotTooFar(source.x+1, source.y))
-            ans.add(createNode(source.x+1, source.y));
-        if(notWallAndNotTooFar(source.x, source.y-1))
-            ans.add(createNode(source.x, source.y-1));
-        if(notWallAndNotTooFar(source.x-1, source.y))
-            ans.add(createNode(source.x-1, source.y));
-
-        return ans;
-    }
-
     private boolean notWallAndNotTooFar(int x, int y) {
         return notWall(x, y) && isReasonable(x, y);
     }
 
-    private boolean notWallAndNotTooFar(Cell cell) {
-        return notWall(cell.x, cell.y) && isReasonable(cell.x, cell.y);
-    }
-
     private boolean notWall(int x, int y) {
-        if(x > -1 && x < SIZE && y > -1 && y < SIZE)
+        if(rangeOk(x, y))
             return bb[x][y] != -1;
         else
             return false;

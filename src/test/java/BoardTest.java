@@ -1,3 +1,4 @@
+import lombok.extern.slf4j.Slf4j;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -6,6 +7,7 @@ import java.util.Stack;
 
 import static org.junit.Assert.*;
 
+@Slf4j
 public class BoardTest {
     static final double DELTA = 0.01;
 
@@ -112,5 +114,17 @@ public class BoardTest {
     @Test
     public void distanceEuclid() {
         System.out.println(board.getDistanceEuclid(622, 622));
+    }
+
+    @Test
+    public void moreThanOneWallAround() {
+        board.bb[19][30] = Board.WALL;
+        board.bb[18][30] = Board.WALL;
+        board.bb[16][30] = Board.WALL;
+        board.bb[13][30] = Board.WALL;
+
+        for(int i =11; i<21; i++)
+            log.info("cell " + i + "/30 = " + board.moreThanTwoWallsAround(i,30));
+        board.printArena();
     }
 }
