@@ -24,7 +24,7 @@ public class Client {
     public static final int PYRAMID = 2;
 
     //milliseconds
-    public static final int CUBE_DELAY = 500;
+    public static final int CUBE_DELAY = 750;
     public static final int PYRAMID_DELAY = 800;
 
     public static void main( String[] args ) throws InterruptedException {
