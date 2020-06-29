@@ -19,14 +19,14 @@ public class Board {
 
     int owner;
     TreeSet<Integer> enemies;
-    TreeSet<Integer> visitedCube;
+//    TreeSet<Integer> visitedCube;
 //    int[] scores;
     int[][] bb;
     NetworkClient nc;
     CellNode middle; //middle of every path search to limit inspected area
     Random rand;
-    int cubeLine;
-    int zz;
+//    int cubeLine;
+//    int zz;
 
     public Board(int owner) {
         this.owner = owner;
@@ -39,12 +39,13 @@ public class Board {
             add(3);
             remove(owner);
         }};
+        log.info("enemies=" + enemies);
 
-        visitedCube = new TreeSet<>();
+//        visitedCube = new TreeSet<>();
 //        scores = new int[] {0, 0, 0, 0}; //plus init position
         bb = new int[SIZE][SIZE];
         rand = new Random();
-        cubeLine = 1;
+//        cubeLine = 1;
         initWalls();
     }
 
@@ -171,6 +172,8 @@ public class Board {
             System.out.println();
             for (int x = 0; x < SIZE; x++) {
                 System.out.printf("%2d ", bb[x][y]);
+//                if(enemyClose(x, y)) System.out.printf("%d/%d = enemy", x, y);
+//                else System.out.printf("%2d ", 0);
             }
         }
         System.out.println();
@@ -291,14 +294,14 @@ public class Board {
                 }
 
             case 1:
-                for(int y = cubeLine; y < SIZE; y++, cubeLine++) {
+                for(int y = 9; y < SIZE; y++) {
                     for (int x = 0; x < SIZE; x++) {
-                        zz = Logic.getZz(x, y);
-                        if (notWall(x, y) && bb[x][y] != owner && !visitedCube.contains(zz)) {
-                            visitedCube.add(zz);
+                        if (notWall(x, y) && bb[x][y] != owner && noEnemyAround(x, y)) {
                             log.info("found cube target = " + x + "/" + y);
                             return new Cell(x, y);
                         }
+//                        if(!noEnemyAround(x, y))
+//                            log.info("no enemy around for " + x + "/" + y + ": " + noEnemyAround(x, y));
                     }
                 }
             case 2:
@@ -310,21 +313,34 @@ public class Board {
         return new Cell(nc.getX(owner, bot), nc.getY(owner, bot));
     }
 
-//    boolean noEnemyAround(int x, int y) {
-//        if (rangeOk(x, y+1) && noEnemy(x, y + 1)) walls++;
-//        if (rangeOk(x+1, y) && nc.isWall(x + 1, y)) walls++;
-//        if (rangeOk(x, y-1) && nc.isWall(x, y - 1)) walls++;
-//        if (rangeOk(x-1, y) && nc.isWall(x - 1, y)) walls++;
-//    }
-//
-//    boolean noEnemy(int x, int y) {
-//        for(int enemy : enemies)
-//            for(int bot=0; bot < 3; bot++)
-//                if(nc.getX(enemy, bot) == x && nc.getY(enemy, bot) == y)
-//                    return false;
-//
-//        return true;
-//    }
+    boolean noEnemyAround(int x, int y) {
+        if (enemyClose(x, y)) return false;
+
+        if (enemyClose(x, y + 1)) return false;
+        if (enemyClose(x+1, y + 1)) return false;
+
+        if (enemyClose(x + 1, y)) return false;
+        if (enemyClose(x + 1, y-1)) return false;
+
+        if (enemyClose(x, y - 1)) return false;
+        if (enemyClose(x-1, y - 1)) return false;
+
+        if (enemyClose(x - 1, y)) return false;
+        if (enemyClose(x - 1, y+1)) return false;
+
+        return true;
+    }
+
+    boolean enemyClose(int x, int y) {
+        if(!rangeOk(x, y)) return true;
+
+        for(int enemy : enemies)
+            for(int bot=0; bot < 3; bot++)
+                if(Math.round(nc.getX(enemy, bot)) == x && Math.round(nc.getY(enemy, bot)) == y)
+                    return true;
+
+        return false;
+    }
 
     /**
      * calculates path from the current bot position to the given target

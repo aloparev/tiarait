@@ -53,21 +53,21 @@ public class Client {
         int zz;
 
         log.info("testing bots location for player = " + nc.getMyPlayerNumber());
-        log.info("player1-red.bot0 x=" + nc.getX(0, 0) + " y=" + nc.getY(0, 0));
-        log.info("player1-red.bot1 x=" + nc.getX(0, 1) + " y=" + nc.getY(0, 1));
-        log.info("player1-red.bot2 x=" + nc.getX(0, 2) + " y=" + nc.getY(0, 2));
+        log.info("player0-red.bot0 x=" + nc.getX(0, 0) + " y=" + nc.getY(0, 0));
+        log.info("player0-red.bot1 x=" + nc.getX(0, 1) + " y=" + nc.getY(0, 1));
+        log.info("player0-red.bot2 x=" + nc.getX(0, 2) + " y=" + nc.getY(0, 2));
 
-        log.info("player2-blu.bot0 x=" + nc.getX(1, 0) + " y=" + nc.getY(1, 0));
-        log.info("player2-blu.bot1 x=" + nc.getX(1, 1) + " y=" + nc.getY(1, 1));
-        log.info("player2-blu.bot2 x=" + nc.getX(1, 2) + " y=" + nc.getY(1, 2));
+        log.info("player1-blu.bot0 x=" + nc.getX(1, 0) + " y=" + nc.getY(1, 0));
+        log.info("player1-blu.bot1 x=" + nc.getX(1, 1) + " y=" + nc.getY(1, 1));
+        log.info("player1-blu.bot2 x=" + nc.getX(1, 2) + " y=" + nc.getY(1, 2));
 
-        log.info("player3-yel.bot0 x=" + nc.getX(2, 0) + " y=" + nc.getY(1, 0));
-        log.info("player3-yel.bot1 x=" + nc.getX(2, 1) + " y=" + nc.getY(1, 1));
-        log.info("player3-yel.bot2 x=" + nc.getX(2, 2) + " y=" + nc.getY(1, 2));
-
-        log.info("player4-gre.bot0 x=" + nc.getX(3, 0) + " y=" + nc.getY(1, 0));
-        log.info("player4-gre.bot1 x=" + nc.getX(3, 1) + " y=" + nc.getY(1, 1));
-        log.info("player4-gre.bot2 x=" + nc.getX(3, 2) + " y=" + nc.getY(1, 2));
+//        log.info("player2-yel.bot0 x=" + nc.getX(2, 0) + " y=" + nc.getY(1, 0));
+//        log.info("player2-yel.bot1 x=" + nc.getX(2, 1) + " y=" + nc.getY(1, 1));
+//        log.info("player2-yel.bot2 x=" + nc.getX(2, 2) + " y=" + nc.getY(1, 2));
+//
+//        log.info("player3-gre.bot0 x=" + nc.getX(3, 0) + " y=" + nc.getY(1, 0));
+//        log.info("player3-gre.bot1 x=" + nc.getX(3, 1) + " y=" + nc.getY(1, 1));
+//        log.info("player3-gre.bot2 x=" + nc.getX(3, 2) + " y=" + nc.getY(1, 2));
 
         while (nc.isAlive()) {
             //eraser
@@ -103,14 +103,14 @@ public class Client {
                 board.stop(CUBE);
             }
             else if(gameRunning) {
-                log.info("cube stack: " + cubeStack);
+//                log.info("cube stack: " + cubeStack);
                 zz = cubeStack.pop();
 //                log.info("cube zz: " + zz);
 //                log.info("board.getDistanceEuclid(board.getCoords(CUBE), Logic.getCellFromZz(zz)): " + board.getDistanceEuclid(board.getCoords(CUBE), Logic.getCellFromZz(zz)));
 
                 move = board.getMoveVector(CUBE, zz);
                 nc.setMoveDirection(CUBE, move.x, move.y);
-                log.info("stepping from " + board.getCoords(CUBE) + " to " + zz);
+//                log.info("stepping from " + board.getCoords(CUBE) + " to " + zz);
 
                 //slow down approaching
                 if((board.getDistanceManhattan(board.getCoords(CUBE), Logic.getCellFromZz(zz)) < 2)) {
