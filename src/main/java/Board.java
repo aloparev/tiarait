@@ -9,33 +9,42 @@ import java.util.*;
  */
 @Slf4j
 public class Board {
+
+    //=======================================
+    //===========BOARD INIT==================
+    //=======================================
+
     static final int SIZE = 32;
     static final int WALL = -1;
 
     int owner;
     TreeSet<Integer> enemies;
-    TreeSet<Integer> unreachable;
+    TreeSet<Integer> visitedCube;
 //    int[] scores;
     int[][] bb;
     NetworkClient nc;
     CellNode middle; //middle of every path search to limit inspected area
     Random rand;
+    int cubeLine;
+    int zz;
 
     public Board(int owner) {
         this.owner = owner;
         log.info("MyPlayerNumber=" + owner);
 
         enemies = new TreeSet<Integer>() {{
+            add(0);
             add(1);
             add(2);
             add(3);
-            add(4);
             remove(owner);
         }};
-//        unreachable = new TreeSet<>();
+
+        visitedCube = new TreeSet<>();
 //        scores = new int[] {0, 0, 0, 0}; //plus init position
         bb = new int[SIZE][SIZE];
         rand = new Random();
+        cubeLine = 1;
         initWalls();
     }
 
@@ -171,6 +180,10 @@ public class Board {
         log.info("printCellColor: owner=" + owner + " | bb[" + x + "][" + y + "]=" + bb[x][y]);
     }
 
+    //=======================================
+    //===========MOVING CMD==================
+    //=======================================
+
     float getRandom() {
         return (float) (rand.nextFloat() - .5);
     }
@@ -188,6 +201,10 @@ public class Board {
         double yd = Math.abs(target.y-source.y);
         return xd + yd;
     }
+
+    //=======================================
+    //===========DISTANCING==================
+    //=======================================
 
     double getDistanceManhattan(int source, int target) {
         return getDistanceManhattan(Logic.getCellFromZz(source), Logic.getCellFromZz(target));
@@ -274,10 +291,11 @@ public class Board {
                 }
 
             case 1:
-                for(int y=0; y<SIZE; y++) {
+                for(int y = cubeLine; y < SIZE; y++, cubeLine++) {
                     for (int x = 0; x < SIZE; x++) {
-                        if (notWall(x, y) && bb[x][y] != owner) {
-//                            printCellColor(x, y);
+                        zz = Logic.getZz(x, y);
+                        if (notWall(x, y) && bb[x][y] != owner && !visitedCube.contains(zz)) {
+                            visitedCube.add(zz);
                             log.info("found cube target = " + x + "/" + y);
                             return new Cell(x, y);
                         }
@@ -291,6 +309,22 @@ public class Board {
     Cell getCoords(int bot) {
         return new Cell(nc.getX(owner, bot), nc.getY(owner, bot));
     }
+
+//    boolean noEnemyAround(int x, int y) {
+//        if (rangeOk(x, y+1) && noEnemy(x, y + 1)) walls++;
+//        if (rangeOk(x+1, y) && nc.isWall(x + 1, y)) walls++;
+//        if (rangeOk(x, y-1) && nc.isWall(x, y - 1)) walls++;
+//        if (rangeOk(x-1, y) && nc.isWall(x - 1, y)) walls++;
+//    }
+//
+//    boolean noEnemy(int x, int y) {
+//        for(int enemy : enemies)
+//            for(int bot=0; bot < 3; bot++)
+//                if(nc.getX(enemy, bot) == x && nc.getY(enemy, bot) == y)
+//                    return false;
+//
+//        return true;
+//    }
 
     /**
      * calculates path from the current bot position to the given target

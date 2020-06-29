@@ -6,7 +6,7 @@ import java.util.Stack;
 import java.util.concurrent.TimeUnit;
 
 /**
- * player colors
+ * player colors ( != player number)
  *  1=red
  *  2=blue
  *  3=yellow
@@ -51,6 +51,23 @@ public class Client {
         int position = -1;
         int lastPosition;
         int zz;
+
+        log.info("testing bots location for player = " + nc.getMyPlayerNumber());
+        log.info("player1-red.bot0 x=" + nc.getX(0, 0) + " y=" + nc.getY(0, 0));
+        log.info("player1-red.bot1 x=" + nc.getX(0, 1) + " y=" + nc.getY(0, 1));
+        log.info("player1-red.bot2 x=" + nc.getX(0, 2) + " y=" + nc.getY(0, 2));
+
+        log.info("player2-blu.bot0 x=" + nc.getX(1, 0) + " y=" + nc.getY(1, 0));
+        log.info("player2-blu.bot1 x=" + nc.getX(1, 1) + " y=" + nc.getY(1, 1));
+        log.info("player2-blu.bot2 x=" + nc.getX(1, 2) + " y=" + nc.getY(1, 2));
+
+        log.info("player3-yel.bot0 x=" + nc.getX(2, 0) + " y=" + nc.getY(1, 0));
+        log.info("player3-yel.bot1 x=" + nc.getX(2, 1) + " y=" + nc.getY(1, 1));
+        log.info("player3-yel.bot2 x=" + nc.getX(2, 2) + " y=" + nc.getY(1, 2));
+
+        log.info("player4-gre.bot0 x=" + nc.getX(3, 0) + " y=" + nc.getY(1, 0));
+        log.info("player4-gre.bot1 x=" + nc.getX(3, 1) + " y=" + nc.getY(1, 1));
+        log.info("player4-gre.bot2 x=" + nc.getX(3, 2) + " y=" + nc.getY(1, 2));
 
         while (nc.isAlive()) {
             //eraser
