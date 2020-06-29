@@ -24,7 +24,7 @@ public class Client {
     public static final int PYRAMID = 2;
 
     //milliseconds
-    public static final int CUBE_DELAY = 750;
+    public static final int CUBE_DELAY = 800;
     public static final int PYRAMID_DELAY = 800;
 
     public static void main( String[] args ) throws InterruptedException {
@@ -88,7 +88,10 @@ public class Client {
             else if(gameRunning) {
                 log.info("cube stack: " + cubeStack);
                 zz = cubeStack.pop();
+                log.info("cube zz: " + zz);
+//                log.info("board.getDistanceEuclid(board.getCoords(CUBE), Logic.getCellFromZz(zz)): " + board.getDistanceEuclid(board.getCoords(CUBE), Logic.getCellFromZz(zz)));
 
+                //trouble here
                 while(board.getDistanceEuclid(board.getCoords(CUBE), Logic.getCellFromZz(zz)) > 1) {
                     lastPosition = position;
                     position = board.getCoords(CUBE).zz;
@@ -96,7 +99,7 @@ public class Client {
 
                     if(lastPosition == position) {
                         board.sendRandomly(CUBE);
-//                        log.info("CUBE RANDOM");
+                        log.info("CUBE RANDOM");
                     }
                     else {
                         nc.setMoveDirection(CUBE, move.x, move.y);

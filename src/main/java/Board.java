@@ -240,7 +240,7 @@ public class Board {
                 || (ta.x == so.x - 1 && ta.y == so.y - 1))
             ans = new Cell(-1, 1);
 
-//        log.info("getMoveVector: move=" + ans);
+        log.info("gotMoveVector: " + ans);
         return ans;
     }
 
@@ -273,8 +273,8 @@ public class Board {
                 for(int y=0; y<SIZE; y++) {
                     for (int x = 0; x < SIZE; x++) {
                         if (notWall(x, y) && bb[x][y] != owner) {
-                            printCellColor(x, y);
-                            log.info("cube target = " + x + "/" + y);
+//                            printCellColor(x, y);
+                            log.info("found cube target = " + x + "/" + y);
                             return new Cell(x, y);
                         }
                     }
@@ -374,17 +374,17 @@ public class Board {
     Stack<Integer> unfoldPath(int source, int target, HashMap<Integer, CellNode> nodes) {
         Stack<Integer> path = new Stack<>();
 
-//        try {
+        try {
             do {
                 if (target != source) { //get rid of current position
                     path.push(target);
                     target = nodes.get(target).prev;
                 }
             } while (nodes.get(target).prev != -1);
-//        } catch (NullPointerException ee) {
-//            log.info("unfoldPath NullPointer");
-//            return markAsWallAndReturnRandom(target);
-//        }
+        } catch (NullPointerException ee) {
+            log.info("unfoldPath NullPointer");
+            return markAsWallAndReturnRandom(target);
+        }
 
 //        log.info("unfolding: source=" + source + ", target=" + target + ", path=" + path);
         return path;
