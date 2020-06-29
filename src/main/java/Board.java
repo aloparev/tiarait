@@ -189,6 +189,10 @@ public class Board {
         return xd + yd;
     }
 
+    double getDistanceManhattan(int source, int target) {
+        return getDistanceManhattan(Logic.getCellFromZz(source), Logic.getCellFromZz(target));
+    }
+
     double getDistanceEuclid(Cell source, Cell target) {
         double xd = Math.abs(target.x-source.x);
         double yd = Math.abs(target.y-source.y);
@@ -240,7 +244,7 @@ public class Board {
                 || (ta.x == so.x - 1 && ta.y == so.y - 1))
             ans = new Cell(-1, 1);
 
-        log.info("gotMoveVector: " + ans);
+//        log.info("gotMoveVector: " + ans);
         return ans;
     }
 

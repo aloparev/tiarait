@@ -49,6 +49,7 @@ public class BoardTest {
     @Test
     public void getManhattanDistance() {
         assertEquals(2, board.getDistanceManhattan(new Cell(12, 29), new Cell(11, 28)), DELTA);
+        System.out.println(board.getDistanceManhattan(79, 47));
     }
 
     @Test

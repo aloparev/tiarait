@@ -88,35 +88,44 @@ public class Client {
             else if(gameRunning) {
                 log.info("cube stack: " + cubeStack);
                 zz = cubeStack.pop();
-                log.info("cube zz: " + zz);
+//                log.info("cube zz: " + zz);
 //                log.info("board.getDistanceEuclid(board.getCoords(CUBE), Logic.getCellFromZz(zz)): " + board.getDistanceEuclid(board.getCoords(CUBE), Logic.getCellFromZz(zz)));
 
                 move = board.getMoveVector(CUBE, zz);
                 nc.setMoveDirection(CUBE, move.x, move.y);
+                log.info("stepping from " + board.getCoords(CUBE) + " to " + zz);
 
-                lastPosition = position;
-                position = board.getCoords(CUBE).zz;
-
-                while(board.getCoords(CUBE).zz != zz)
-                    log.info("on my way to the next cell");
-
-                //trouble here
-                while(board.getDistanceEuclid(board.getCoords(CUBE), Logic.getCellFromZz(zz)) > 1) {
-                    lastPosition = position;
-                    position = board.getCoords(CUBE).zz;
-                    move = board.getMoveVector(CUBE, zz);
-
-                    if(lastPosition == position) {
-                        board.sendRandomly(CUBE);
-                        log.info("CUBE RANDOM");
-                    }
-                    else {
+                //slow down approaching
+                if((board.getDistanceManhattan(board.getCoords(CUBE), Logic.getCellFromZz(zz)) < 2)) {
+                    do {
+//                        lastPosition = position;
+//                        position = board.getCoords(CUBE).zz;
+                        board.stop(CUBE);
+                        move = board.getMoveVector(CUBE, zz);
                         nc.setMoveDirection(CUBE, move.x, move.y);
-                        log.info("CUBE REAL: position=" + position + " lastPosition" + lastPosition + " target=" + zz);
-                    }
-                    TimeUnit.MILLISECONDS.sleep(CUBE_DELAY);
+                        TimeUnit.MILLISECONDS.sleep(100);
+                    } while(board.getCoords(CUBE).zz != zz);
+//                    log.info("on my way to the next cell");
                 }
+
                 board.stop(CUBE);
+                //trouble here
+//                while(board.getDistanceEuclid(board.getCoords(CUBE), Logic.getCellFromZz(zz)) > 1) {
+//                    lastPosition = position;
+//                    position = board.getCoords(CUBE).zz;
+//                    move = board.getMoveVector(CUBE, zz);
+//
+//                    if(lastPosition == position) {
+//                        board.sendRandomly(CUBE);
+//                        log.info("CUBE RANDOM");
+//                    }
+//                    else {
+//                        nc.setMoveDirection(CUBE, move.x, move.y);
+//                        log.info("CUBE REAL: position=" + position + " lastPosition" + lastPosition + " target=" + zz);
+//                    }
+//                    TimeUnit.MILLISECONDS.sleep(CUBE_DELAY);
+//                }
+//                board.stop(CUBE);
             }
 
             //manual control PYRAMID
