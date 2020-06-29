@@ -91,6 +91,15 @@ public class Client {
                 log.info("cube zz: " + zz);
 //                log.info("board.getDistanceEuclid(board.getCoords(CUBE), Logic.getCellFromZz(zz)): " + board.getDistanceEuclid(board.getCoords(CUBE), Logic.getCellFromZz(zz)));
 
+                move = board.getMoveVector(CUBE, zz);
+                nc.setMoveDirection(CUBE, move.x, move.y);
+
+                lastPosition = position;
+                position = board.getCoords(CUBE).zz;
+
+                while(board.getCoords(CUBE).zz != zz)
+                    log.info("on my way to the next cell");
+
                 //trouble here
                 while(board.getDistanceEuclid(board.getCoords(CUBE), Logic.getCellFromZz(zz)) > 1) {
                     lastPosition = position;
@@ -107,7 +116,7 @@ public class Client {
                     }
                     TimeUnit.MILLISECONDS.sleep(CUBE_DELAY);
                 }
-//                board.stop(CUBE);
+                board.stop(CUBE);
             }
 
             //manual control PYRAMID
