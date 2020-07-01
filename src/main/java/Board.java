@@ -294,16 +294,15 @@ public class Board {
                 }
 
             case 1:
-                for(int y = 9; y < SIZE; y++) {
-                    for (int x = 0; x < SIZE; x++) {
+                for(int y = 1; y < SIZE; y++) {
+                    for (int x = 1; x < SIZE; x++) {
                         if (notWall(x, y) && bb[x][y] != owner && noEnemyAround(x, y)) {
                             log.info("found cube target = " + x + "/" + y);
                             return new Cell(x, y);
                         }
-//                        if(!noEnemyAround(x, y))
-//                            log.info("no enemy around for " + x + "/" + y + ": " + noEnemyAround(x, y));
                     }
                 }
+
             case 2:
             default: return getCoords(bot);
         }
@@ -428,17 +427,17 @@ public class Board {
     Stack<Integer> unfoldPath(int source, int target, HashMap<Integer, CellNode> nodes) {
         Stack<Integer> path = new Stack<>();
 
-        try {
+//        try {
             do {
                 if (target != source) { //get rid of current position
                     path.push(target);
                     target = nodes.get(target).prev;
                 }
             } while (nodes.get(target).prev != -1);
-        } catch (NullPointerException ee) {
-            log.info("unfoldPath NullPointer");
-            return markAsWallAndReturnRandom(target);
-        }
+//        } catch (NullPointerException ee) {
+//            log.info("unfoldPath NullPointer");
+//            return markAsWallAndReturnRandom(target);
+//        }
 
 //        log.info("unfolding: source=" + source + ", target=" + target + ", path=" + path);
         return path;
