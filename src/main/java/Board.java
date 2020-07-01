@@ -2,6 +2,7 @@ import lenz.htw.tiarait.net.NetworkClient;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * board-brain class
@@ -27,7 +28,7 @@ public class Board {
     CellNode middle; //middle of every path search to limit inspected area
     Random rand;
 //    int cubeLine;
-//    int zz;
+    int xr, yr;
 
     public Board(int owner) {
         this.owner = owner;
@@ -326,6 +327,12 @@ public class Board {
                 }
 
             case 2:
+                do {
+                    xr = ThreadLocalRandom.current().nextInt(0, SIZE);
+                    yr = ThreadLocalRandom.current().nextInt(0, SIZE);
+                } while (!rangeOk(xr, yr) && !notWall(xr, yr) && bb[xr][yr] == owner && !noEnemyAround(xr, yr));
+                return new Cell(xr, yr);
+
             default: return getCoords(bot);
         }
     }
@@ -450,11 +457,12 @@ public class Board {
             do {
                 if (target != source) { //get rid of current position
                     path.push(target);
+                    System.out.print(target + " ");
                     target = nodes.get(target).prev;
                 }
             } while (nodes.get(target).prev != -1);
         } catch (NullPointerException ee) {
-            log.info("unfoldPath NullPointer");
+            log.info("unfoldPath NullPointer: source=" + source + " target=" + target + " path=\n" + path);
             return new Stack<Integer>() {{
                 add(Logic.getZz(getRandom(), getRandom()));
             }};

@@ -45,7 +45,7 @@ public class Client {
         Stack<Integer> cubeStack = new Stack<>();
         Stack<Integer> pyramidStack = new Stack<>();
         Stack<Integer> eraserStack = new Stack<>();
-        Cell move = null;
+        Cell move;
         int zz;
 
         log.info("testing bots location for player = " + nc.getMyPlayerNumber());
@@ -98,7 +98,7 @@ public class Client {
             if(cubeStack.isEmpty()) {
                 cubeStack = board.analyseAndGetStack(CUBE);
 //                board.sendRandomly(CUBE);
-                log.info("cube stack init: " + cubeStack);
+//                log.info("cube stack init: " + cubeStack);
                 board.stop(CUBE);
             }
             else if(gameRunning) {
@@ -158,7 +158,27 @@ public class Client {
 //            nc.setMoveDirection(PYRAMID, x, y);
 //                log.info("pyramyd coords: " + board.getCoords(PYRAMID));
 
-            log.info("scores=" + Arrays.toString(board.scores));
+            if(pyramidStack.isEmpty()) {
+                pyramidStack = board.analyseAndGetStack(PYRAMID);
+            }
+            else if(gameRunning) {
+//                log.info("eraser stack: " + cubeStack);
+                zz = pyramidStack.pop();
+                move = board.getMoveVector(PYRAMID, zz);
+                nc.setMoveDirection(PYRAMID, move.x, move.y);
+
+                if((board.getDistanceManhattan(board.getCoords(PYRAMID), Logic.getCellFromZz(zz)) < 2)) {
+                    do {
+                        board.stop(PYRAMID);
+                        move = board.getMoveVector(PYRAMID, zz);
+                        nc.setMoveDirection(PYRAMID, move.x, move.y);
+                        TimeUnit.MILLISECONDS.sleep(DELAY);
+                    } while(board.getCoords(PYRAMID).zz != zz);
+                }
+                board.stop(PYRAMID);
+            }
+
+//            log.info("scores=" + Arrays.toString(board.scores));
             while ((cc = nc.getNextColorChange()) != null) {
                 gameRunning = true;
 
