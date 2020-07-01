@@ -2,15 +2,17 @@ import lenz.htw.tiarait.ColorChange;
 import lenz.htw.tiarait.net.NetworkClient;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.Arrays;
 import java.util.Stack;
 import java.util.concurrent.TimeUnit;
 
 /**
- * player colors ( != player number)
- *  1=red
- *  2=blue
- *  3=yellow
- *  4=green
+ * color change / player number
+ *  0=empty
+ *  1=red               0
+ *  2=blue              1
+ *  3=yellow            2
+ *  4=green             3
  *
  * bots
  *  0=eraser
@@ -22,10 +24,7 @@ public class Client {
     public static final int ERASER = 0;
     public static final int CUBE = 1;
     public static final int PYRAMID = 2;
-
-    //milliseconds
-    public static final int CUBE_DELAY = 800;
-    public static final int PYRAMID_DELAY = 800;
+    public static final int DELAY = 100;     //milliseconds
 
     public static void main( String[] args ) throws InterruptedException {
         String team = "fox";
@@ -39,14 +38,12 @@ public class Client {
 
         float x, y;
         boolean gameRunning = false;
-
         NetworkClient nc = new NetworkClient(host, team);
         Board board = new Board(nc); // 0-3 (ACHTUNG! andere Nummerierung als beim ColorChange)
         ColorChange cc;
         Stack<Integer> cubeStack = new Stack<>();
         Stack<Integer> pyramidStack = new Stack<>();
         Stack<Integer> eraserStack = new Stack<>();
-
         Cell move = null;
         int position = -1;
         int lastPosition;
@@ -61,45 +58,47 @@ public class Client {
         log.info("player1-blu.bot1 x=" + nc.getX(1, 1) + " y=" + nc.getY(1, 1));
         log.info("player1-blu.bot2 x=" + nc.getX(1, 2) + " y=" + nc.getY(1, 2));
 
-//        log.info("player2-yel.bot0 x=" + nc.getX(2, 0) + " y=" + nc.getY(1, 0));
-//        log.info("player2-yel.bot1 x=" + nc.getX(2, 1) + " y=" + nc.getY(1, 1));
-//        log.info("player2-yel.bot2 x=" + nc.getX(2, 2) + " y=" + nc.getY(1, 2));
-//
-//        log.info("player3-gre.bot0 x=" + nc.getX(3, 0) + " y=" + nc.getY(1, 0));
-//        log.info("player3-gre.bot1 x=" + nc.getX(3, 1) + " y=" + nc.getY(1, 1));
-//        log.info("player3-gre.bot2 x=" + nc.getX(3, 2) + " y=" + nc.getY(1, 2));
+        log.info("player2-yel.bot0 x=" + nc.getX(2, 0) + " y=" + nc.getY(1, 0));
+        log.info("player2-yel.bot1 x=" + nc.getX(2, 1) + " y=" + nc.getY(1, 1));
+        log.info("player2-yel.bot2 x=" + nc.getX(2, 2) + " y=" + nc.getY(1, 2));
+
+        log.info("player3-gre.bot0 x=" + nc.getX(3, 0) + " y=" + nc.getY(1, 0));
+        log.info("player3-gre.bot1 x=" + nc.getX(3, 1) + " y=" + nc.getY(1, 1));
+        log.info("player3-gre.bot2 x=" + nc.getX(3, 2) + " y=" + nc.getY(1, 2));
 
         while (nc.isAlive()) {
-            //eraser
-//            if(eraserStack.isEmpty()) {
-//                eraserStack = board.analyseAndGetStack(ERASER);
-//                board.stop(ERASER);
-//                log.info("eraser stack init: " + cubeStack);
-//            }
-//            else if(gameRunning) {
-//                log.info("eraser stack: " + cubeStack);
-//                zz = eraserStack.pop();
-//
-//                while(board.getDistanceEuclid(board.getCoords(ERASER), Logic.getCellFromZz(zz)) > 1) {
-//                    lastPosition = position;
-//                    position = board.getCoords(ERASER).zz;
-//                    move = board.getMoveVector(ERASER, zz);
-//
-//                    if(lastPosition == position) {
-//                        board.sendRandomly(ERASER);
-//                    }
-//                    else {
-//                        nc.setMoveDirection(ERASER, move.x, move.y);
-//                    }
-//                    TimeUnit.MILLISECONDS.sleep(CUBE_DELAY);
-//                }
-//            }
+//=============================================================================
+//====================================ERASER===================================
+//=============================================================================
+            if(eraserStack.isEmpty()) {
+                eraserStack = board.analyseAndGetStack(ERASER);
+                log.info("eraser stack init: " + cubeStack);
+            }
+            else if(gameRunning) {
+                log.info("eraser stack: " + cubeStack);
+                zz = eraserStack.pop();
+                move = board.getMoveVector(ERASER, zz);
+                nc.setMoveDirection(ERASER, move.x, move.y);
 
-            //cube
+                if((board.getDistanceManhattan(board.getCoords(ERASER), Logic.getCellFromZz(zz)) < 2)) {
+                    do {
+                        board.stop(ERASER);
+                        move = board.getMoveVector(ERASER, zz);
+                        nc.setMoveDirection(ERASER, move.x, move.y);
+                        TimeUnit.MILLISECONDS.sleep(DELAY);
+                    } while(board.getCoords(ERASER).zz != zz);
+                }
+                board.stop(CUBE);
+            }
+
+//============================================================================
+//=====================================CUBE===================================
+//============================================================================
             if(cubeStack.isEmpty()) {
                 cubeStack = board.analyseAndGetStack(CUBE);
 //                board.sendRandomly(CUBE);
                 log.info("cube stack init: " + cubeStack);
+                log.info("scores: " + Arrays.toString(board.scores));
                 board.stop(CUBE);
             }
             else if(gameRunning) {
@@ -120,7 +119,7 @@ public class Client {
                         board.stop(CUBE);
                         move = board.getMoveVector(CUBE, zz);
                         nc.setMoveDirection(CUBE, move.x, move.y);
-                        TimeUnit.MILLISECONDS.sleep(100);
+                        TimeUnit.MILLISECONDS.sleep(DELAY);
                     } while(board.getCoords(CUBE).zz != zz);
 //                    log.info("on my way to the next cell");
                 }
@@ -145,7 +144,9 @@ public class Client {
 //                board.stop(CUBE);
             }
 
-            //manual control PYRAMID
+//============================================================================
+//====================================PYRAMID=================================
+//============================================================================
 //            Scanner sc = new Scanner(System.in);
 //            try {
 //                x = Float.parseFloat(sc.nextLine());
@@ -159,7 +160,15 @@ public class Client {
 
             while ((cc = nc.getNextColorChange()) != null) {
                 gameRunning = true;
-                board.bb[cc.x][cc.y] = cc.newColor - 1;
+
+                if(cc.newColor == 0) {
+//                    log.info("content=" + board.bb[cc.x][cc.y]);
+                    board.scores[board.bb[cc.x][cc.y] - 1]--;
+                }
+                else
+                    board.scores[cc.newColor - 1]++;
+
+                board.bb[cc.x][cc.y] = cc.newColor;
 //                log.info("cc update: bb[" + cc.x + "][" + cc.y + "] = " + cc.newColor);
             }
         }

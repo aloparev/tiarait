@@ -20,7 +20,7 @@ public class Board {
     int owner;
     TreeSet<Integer> enemies;
 //    TreeSet<Integer> visitedCube;
-//    int[] scores;
+    int[] scores;
     int[][] bb;
     NetworkClient nc;
     CellNode middle; //middle of every path search to limit inspected area
@@ -33,16 +33,18 @@ public class Board {
         log.info("MyPlayerNumber=" + owner);
 
         enemies = new TreeSet<Integer>() {{
-            add(0);
             add(1);
             add(2);
             add(3);
+            add(4);
             remove(owner);
         }};
         log.info("enemies=" + enemies);
 
 //        visitedCube = new TreeSet<>();
-//        scores = new int[] {0, 0, 0, 0}; //plus init position
+        scores = new int[] {0, 0, 0, 0}; //plus init position
+        log.info("scores=" + Arrays.toString(scores));
+
         bb = new int[SIZE][SIZE];
         rand = new Random();
 //        cubeLine = 1;
@@ -50,7 +52,7 @@ public class Board {
     }
 
     public Board(NetworkClient nc) {
-        this(nc.getMyPlayerNumber());
+        this(nc.getMyPlayerNumber() + 1);
         this.nc = nc;
         initObstacles();
     }
@@ -199,15 +201,15 @@ public class Board {
         nc.setMoveDirection(bot, getRandom(), getRandom());
     }
 
+    //=======================================
+    //===========DISTANCING==================
+    //=======================================
+
     double getDistanceManhattan(Cell source, Cell target) {
         double xd = Math.abs(target.x-source.x);
         double yd = Math.abs(target.y-source.y);
         return xd + yd;
     }
-
-    //=======================================
-    //===========DISTANCING==================
-    //=======================================
 
     double getDistanceManhattan(int source, int target) {
         return getDistanceManhattan(Logic.getCellFromZz(source), Logic.getCellFromZz(target));
@@ -222,6 +224,18 @@ public class Board {
     double getDistanceEuclid(int source, int target) {
         return getDistanceEuclid(Logic.getCellFromZz(source), Logic.getCellFromZz(target));
     }
+
+    Cell getCoords(int bot) {
+        return getCoords(owner, bot);
+    }
+
+    Cell getCoords(int player, int bot) {
+        return new Cell(nc.getX(player-1, bot), nc.getY(player-1, bot));
+    }
+
+    //=======================================
+    //================LOGIC==================
+    //=======================================
 
     Cell getMoveVector(int bot, int targetInit) {
         Cell so = getCoords(bot);
@@ -275,29 +289,30 @@ public class Board {
     Cell findTarget(int bot) {
         switch (bot) {
             case 0:
-                int xStart, xEnd;
-                int yStart, yEnd;
-                Cell pos = getCoords(bot);
+                int strongestEnemy = -1, maxScore = -1;
 
-                for(int i=4; i<SIZE; i+=4) {
-                    xStart = Math.max(pos.x - i, 0);
-                    xEnd = Math.min(pos.x + i, SIZE);
-                    yStart = Math.max(pos.y - i, 0);
-                    yEnd = Math.min(pos.y + i, SIZE);
-
-                    for(int y=yStart; y<yEnd; y++)
-                        for(int x=xStart; x<xEnd; x++)
-                            if(enemies.contains(bb[x][y])) {
-                                log.info("eraser target = " + x + "/" + y);
-                                return createNode(x, y);
-                            }
+                for(int i = 0; i < scores.length; i++) {
+                    if (i+1 != owner && scores[i] > maxScore) {
+                        maxScore = scores[i];
+                        strongestEnemy = i+1;
+                    }
                 }
+
+                log.info("strongestEnemy=" + strongestEnemy);
+                Cell myPosition = getCoords(Client.ERASER);
+                Cell enemyCube = getCoords(strongestEnemy, Client.CUBE);
+                Cell enemyPyramid = getCoords(strongestEnemy, Client.PYRAMID);
+
+                if(getDistanceManhattan(myPosition, enemyCube) < getDistanceManhattan(myPosition, enemyPyramid))
+                    return enemyCube;
+                else
+                    return enemyPyramid;
 
             case 1:
                 for(int y = 1; y < SIZE; y++) {
                     for (int x = 1; x < SIZE; x++) {
                         if (notWall(x, y) && bb[x][y] != owner && noEnemyAround(x, y)) {
-                            log.info("found cube target = " + x + "/" + y);
+//                            log.info("found cube target = " + x + "/" + y);
                             return new Cell(x, y);
                         }
                     }
@@ -308,9 +323,6 @@ public class Board {
         }
     }
 
-    Cell getCoords(int bot) {
-        return new Cell(nc.getX(owner, bot), nc.getY(owner, bot));
-    }
 
     boolean noEnemyAround(int x, int y) {
         if (enemyClose(x, y)) return false;
@@ -335,7 +347,7 @@ public class Board {
 
         for(int enemy : enemies)
             for(int bot=0; bot < 3; bot++)
-                if(Math.round(nc.getX(enemy, bot)) == x && Math.round(nc.getY(enemy, bot)) == y)
+                if(Math.round(nc.getX(enemy-1, bot)) == x && Math.round(nc.getY(enemy-1, bot)) == y)
                     return true;
 
         return false;
@@ -427,17 +439,19 @@ public class Board {
     Stack<Integer> unfoldPath(int source, int target, HashMap<Integer, CellNode> nodes) {
         Stack<Integer> path = new Stack<>();
 
-//        try {
+        try {
             do {
                 if (target != source) { //get rid of current position
                     path.push(target);
                     target = nodes.get(target).prev;
                 }
             } while (nodes.get(target).prev != -1);
-//        } catch (NullPointerException ee) {
-//            log.info("unfoldPath NullPointer");
-//            return markAsWallAndReturnRandom(target);
-//        }
+        } catch (NullPointerException ee) {
+            log.info("unfoldPath NullPointer");
+            return new Stack<Integer>() {{
+                add(Logic.getZz(getRandom(), getRandom()));
+            }};
+        }
 
 //        log.info("unfolding: source=" + source + ", target=" + target + ", path=" + path);
         return path;
