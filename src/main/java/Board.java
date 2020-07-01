@@ -298,7 +298,7 @@ public class Board {
                     }
                 }
 
-                log.info("strongestEnemy=" + strongestEnemy);
+//                log.info("strongestEnemy=" + strongestEnemy);
                 Cell myPosition = getCoords(Client.ERASER);
                 Cell enemyCube = getCoords(strongestEnemy, Client.CUBE);
                 Cell enemyPyramid = getCoords(strongestEnemy, Client.PYRAMID);

@@ -48,6 +48,7 @@ public class Client {
         int position = -1;
         int lastPosition;
         int zz;
+        int[] lastScores = board.scores.clone();
 
         log.info("testing bots location for player = " + nc.getMyPlayerNumber());
         log.info("player0-red.bot0 x=" + nc.getX(0, 0) + " y=" + nc.getY(0, 0));
@@ -70,8 +71,9 @@ public class Client {
 //=============================================================================
 //====================================ERASER===================================
 //=============================================================================
-            if(eraserStack.isEmpty()) {
+            if(eraserStack.isEmpty() && !Arrays.equals(board.scores, lastScores)) {
                 eraserStack = board.analyseAndGetStack(ERASER);
+                lastScores = board.scores.clone();
                 log.info("eraser stack init: " + cubeStack);
             }
             else if(gameRunning) {
@@ -85,7 +87,7 @@ public class Client {
                         board.stop(ERASER);
                         move = board.getMoveVector(ERASER, zz);
                         nc.setMoveDirection(ERASER, move.x, move.y);
-                        TimeUnit.MILLISECONDS.sleep(DELAY);
+//                        TimeUnit.MILLISECONDS.sleep(DELAY);
                     } while(board.getCoords(ERASER).zz != zz);
                 }
                 board.stop(CUBE);
@@ -119,7 +121,7 @@ public class Client {
                         board.stop(CUBE);
                         move = board.getMoveVector(CUBE, zz);
                         nc.setMoveDirection(CUBE, move.x, move.y);
-                        TimeUnit.MILLISECONDS.sleep(DELAY);
+//                        TimeUnit.MILLISECONDS.sleep(DELAY);
                     } while(board.getCoords(CUBE).zz != zz);
 //                    log.info("on my way to the next cell");
                 }
