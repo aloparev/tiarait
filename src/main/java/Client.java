@@ -3,6 +3,7 @@ import lenz.htw.tiarait.net.NetworkClient;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Stack;
 import java.util.concurrent.TimeUnit;
 
@@ -24,7 +25,7 @@ public class Client {
     public static final int ERASER = 0;
     public static final int CUBE = 1;
     public static final int PYRAMID = 2;
-    public static final int DELAY = 50;     //milliseconds
+    public static final int DELAY = 40;     //milliseconds
 
     public static void main( String[] args ) throws InterruptedException {
         String team = "fox";
@@ -45,10 +46,7 @@ public class Client {
         Stack<Integer> pyramidStack = new Stack<>();
         Stack<Integer> eraserStack = new Stack<>();
         Cell move = null;
-        int position = -1;
-        int lastPosition;
         int zz;
-        int[] lastScores = board.scores.clone();
 
         log.info("testing bots location for player = " + nc.getMyPlayerNumber());
         log.info("player0-red.bot0 x=" + nc.getX(0, 0) + " y=" + nc.getY(0, 0));
@@ -71,13 +69,14 @@ public class Client {
 //=============================================================================
 //====================================ERASER===================================
 //=============================================================================
-            if(eraserStack.isEmpty() && !Arrays.equals(board.scores, lastScores)) {
+            if(eraserStack.isEmpty()) {// && !lastScores.equals(board.enemies)) {
                 eraserStack = board.analyseAndGetStack(ERASER);
-                lastScores = board.scores.clone();
-                log.info("eraser stack init: " + cubeStack);
+//                lastScores = board.scores.clone();
+//                lastScores = new HashMap<>(board.enemies);
+//                log.info("eraser stack init: " + cubeStack);
             }
             else if(gameRunning) {
-                log.info("eraser stack: " + cubeStack);
+//                log.info("eraser stack: " + cubeStack);
                 zz = eraserStack.pop();
                 move = board.getMoveVector(ERASER, zz);
                 nc.setMoveDirection(ERASER, move.x, move.y);
@@ -87,7 +86,7 @@ public class Client {
                         board.stop(ERASER);
                         move = board.getMoveVector(ERASER, zz);
                         nc.setMoveDirection(ERASER, move.x, move.y);
-//                        TimeUnit.MILLISECONDS.sleep(DELAY);
+                        TimeUnit.MILLISECONDS.sleep(DELAY);
                     } while(board.getCoords(ERASER).zz != zz);
                 }
                 board.stop(CUBE);
@@ -100,7 +99,6 @@ public class Client {
                 cubeStack = board.analyseAndGetStack(CUBE);
 //                board.sendRandomly(CUBE);
                 log.info("cube stack init: " + cubeStack);
-                log.info("scores: " + Arrays.toString(board.scores));
                 board.stop(CUBE);
             }
             else if(gameRunning) {
@@ -121,7 +119,7 @@ public class Client {
                         board.stop(CUBE);
                         move = board.getMoveVector(CUBE, zz);
                         nc.setMoveDirection(CUBE, move.x, move.y);
-//                        TimeUnit.MILLISECONDS.sleep(DELAY);
+                        TimeUnit.MILLISECONDS.sleep(DELAY);
                     } while(board.getCoords(CUBE).zz != zz);
 //                    log.info("on my way to the next cell");
                 }
@@ -160,15 +158,22 @@ public class Client {
 //            nc.setMoveDirection(PYRAMID, x, y);
 //                log.info("pyramyd coords: " + board.getCoords(PYRAMID));
 
+            log.info("scores=" + Arrays.toString(board.scores));
             while ((cc = nc.getNextColorChange()) != null) {
                 gameRunning = true;
 
+//                log.info("enemy=" + board.bb[cc.x][cc.y] + " count=" + board.enemies.get(board.bb[cc.x][cc.y]));
+
+//                if(cc.newColor == 0 && board.enemies.containsKey(board.bb[cc.x][cc.y])) {
                 if(cc.newColor == 0) {
 //                    log.info("content=" + board.bb[cc.x][cc.y]);
                     board.scores[board.bb[cc.x][cc.y] - 1]--;
+//                    board.enemies.put(board.bb[cc.x][cc.y], board.enemies.get(board.bb[cc.x][cc.y])-1);
                 }
-                else
+                else {
+//                    board.enemies.put(board.bb[cc.x][cc.y], board.enemies.get(board.bb[cc.x][cc.y]) + 1);
                     board.scores[cc.newColor - 1]++;
+                }
 
                 board.bb[cc.x][cc.y] = cc.newColor;
 //                log.info("cc update: bb[" + cc.x + "][" + cc.y + "] = " + cc.newColor);

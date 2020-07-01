@@ -19,8 +19,9 @@ public class Board {
 
     int owner;
     TreeSet<Integer> enemies;
+//    HashMap<Integer, Integer> enemies;
 //    TreeSet<Integer> visitedCube;
-    int[] scores;
+    int[] scores = new int[] {0, 0, 0, 0};
     int[][] bb;
     NetworkClient nc;
     CellNode middle; //middle of every path search to limit inspected area
@@ -39,11 +40,13 @@ public class Board {
             add(4);
             remove(owner);
         }};
+//        enemies = new HashMap<>();
+//        for(int i=1; i<5; i++)
+//            if(owner != i) enemies.put(i, 0);
         log.info("enemies=" + enemies);
 
 //        visitedCube = new TreeSet<>();
-        scores = new int[] {0, 0, 0, 0}; //plus init position
-        log.info("scores=" + Arrays.toString(scores));
+//        log.info("scores=" + Arrays.toString(scores));
 
         bb = new int[SIZE][SIZE];
         rand = new Random();
@@ -68,7 +71,7 @@ public class Board {
                 if(nc.isWall(xx, yy)) bb[xx][yy] = Board.WALL;
                 if(!nc.isWall(xx, yy) && moreThanTwoWallsAround(xx, yy)) bb[xx][yy] = Board.WALL;
             }
-        printArena();
+//        printArena();
     }
 
     boolean moreThanTwoWallsAround(int x, int y) {
@@ -291,12 +294,16 @@ public class Board {
             case 0:
                 int strongestEnemy = -1, maxScore = -1;
 
-                for(int i = 0; i < scores.length; i++) {
-                    if (i+1 != owner && scores[i] > maxScore) {
-                        maxScore = scores[i];
-                        strongestEnemy = i+1;
+                for(int enemy = 0; enemy < scores.length; enemy++) {
+                    if (enemy+1 == owner) continue;
+
+                    if(scores[enemy] > maxScore) {
+                        maxScore = scores[enemy];
+                        strongestEnemy = enemy+1;
                     }
                 }
+
+                if(strongestEnemy == -1) return new Cell(getRandom(), getRandom());
 
 //                log.info("strongestEnemy=" + strongestEnemy);
                 Cell myPosition = getCoords(Client.ERASER);
