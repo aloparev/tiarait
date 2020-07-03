@@ -42,6 +42,12 @@ public class Client {
         NetworkClient nc = new NetworkClient(host, team);
         Board board = new Board(nc); // 0-3 (ACHTUNG! andere Nummerierung als beim ColorChange)
         ColorChange cc;
+//        Stack[] stacks = new Stack[3];
+//        stacks[ERASER] = new Stack<Integer>();
+//        stacks[CUBE] = new Stack<Integer>();
+//        stacks[PYRAMID] = new Stack<Integer>();
+//        Thread[] threads = new Thread[3];
+
         Stack<Integer> cubeStack = new Stack<>();
         Stack<Integer> pyramidStack = new Stack<>();
         Stack<Integer> eraserStack = new Stack<>();

@@ -453,23 +453,16 @@ public class Board {
 
     Stack<Integer> unfoldPath(int source, int target, HashMap<Integer, CellNode> nodes) {
         Stack<Integer> path = new Stack<>();
-
-        try {
-            do {
-//                if (target != source) { //get rid of current position
-                    path.push(target);
-                    System.out.print(target + " ");
-                    target = nodes.get(target).prev;
-//                }
-            } while (nodes.get(target).prev != -1);
+        try { do {
+                path.push(target);
+//                System.out.print(target + " ");
+                target = nodes.get(target).prev;
+            } while (target != -1);
         } catch (NullPointerException ee) {
             log.info("unfoldPath NullPointer: source=" + source + " target=" + target + " path=\n" + path);
             System.out.println();
-
             path.push(Logic.getZz(getRandom(), getRandom()));
         }
-
-//        log.info("unfolding: source=" + source + ", target=" + target + ", path=" + path);
         return path;
     }
 
