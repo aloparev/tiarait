@@ -216,7 +216,7 @@ public class Board {
     }
 
     double getDistanceManhattan(int source, int target) {
-        return getDistanceManhattan(Logic.getCellFromZz(source), Logic.getCellFromZz(target));
+        return getDistanceManhattan(getCellFromZz(source), getCellFromZz(target));
     }
 
     double getDistanceEuclid(Cell source, Cell target) {
@@ -226,7 +226,7 @@ public class Board {
     }
 
     double getDistanceEuclid(int source, int target) {
-        return getDistanceEuclid(Logic.getCellFromZz(source), Logic.getCellFromZz(target));
+        return getDistanceEuclid(getCellFromZz(source), getCellFromZz(target));
     }
 
     Cell getCoords(int bot) {
@@ -243,7 +243,7 @@ public class Board {
 
     Cell getMoveVector(int bot, int targetInit) {
         Cell so = getCoords(bot);
-        Cell ta = Logic.getCellFromZz(targetInit);
+        Cell ta = getCellFromZz(targetInit);
 //        Cell ans = new Cell(getRandom(), getRandom());
         Cell ans = new Cell(0,0);
 
@@ -461,18 +461,18 @@ public class Board {
         } catch (NullPointerException ee) {
             log.info("unfoldPath NullPointer: source=" + source + " target=" + target + " path=\n" + path);
             System.out.println();
-            path.push(Logic.getZz(getRandom(), getRandom()));
+            path.push(getZz(getRandom(), getRandom()));
         }
         return path;
     }
 
     Stack<Integer> markAsWallAndReturnRandom(int zz) {
-        int x = Logic.getX(zz);
-        int y = Logic.getY(zz);
+        int x = getX(zz);
+        int y = getY(zz);
         bb[x][y] = WALL;
 
         return new Stack<Integer>() {{
-            add(Logic.getZz(getRandom(), getRandom()));
+            add(getZz(getRandom(), getRandom()));
         }};
     }
 
@@ -486,5 +486,29 @@ public class Board {
         if(enemies.contains(color)) return 1;
         else if(color == 0) return 10;
         else return 100;
+    }
+
+    static int getZz(int x, int y) {
+        return x + Board.SIZE * y;
+    }
+
+    static int getZz(float x, float y) {
+        return (int) (x + Board.SIZE * y);
+    }
+
+    static Cell getCellFromZz(int zz) {
+        return new Cell(getX(zz), getY(zz));
+    }
+
+    static Cell getXy(int zz) {
+        return new Cell(zz % Board.SIZE, zz / Board.SIZE);
+    }
+
+    static int getX(int zz) {
+        return zz % Board.SIZE;
+    }
+
+    static int getY(int zz) {
+        return zz / Board.SIZE;
     }
 }

@@ -11,12 +11,12 @@ public class Cell {
     public Cell(int x, int y) {
         this.x = x;
         this.y = y;
-        this.zz = Logic.getZz(x, y);
+        this.zz = Board.getZz(x, y);
     }
 
     public Cell(int zz) {
-        this.x = Logic.getX(zz);
-        this.y = Logic.getY(zz);
+        this.x = Board.getX(zz);
+        this.y = Board.getY(zz);
         this.zz = zz;
     }
 

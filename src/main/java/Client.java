@@ -26,7 +26,7 @@ public class Client {
     public static final int DELAY = 50;     //milliseconds
     public static final int BOTS = 3;
 
-    public static void main( String[] args ) throws InterruptedException {
+    public static void main( String[] args ) {
         String team = "fox";
         String host = "127.0.0.1";
 
@@ -36,7 +36,6 @@ public class Client {
         } else log.info("no args for host & team submitted, using defaults");
         System.out.println("\ttiarait client up and running: host=" + host + " team=" + team);
 
-        float x, y;
         boolean gameRunning = false;
         NetworkClient nc = new NetworkClient(host, team);
         Board board = new Board(nc); // 0-3 (ACHTUNG! andere Nummerierung als beim ColorChange)
@@ -81,7 +80,7 @@ public class Client {
                         Cell move = board.getMoveVector(bot, zz);
                         nc.setMoveDirection(bot, move.x, move.y);
 
-                        if((board.getDistanceManhattan(board.getCoords(bot), Logic.getCellFromZz(zz)) < 2)) {
+                        if((board.getDistanceManhattan(board.getCoords(bot), Board.getCellFromZz(zz)) < 2)) {
                             do {
 //                                board.stop(bot);
                                 move = board.getMoveVector(bot, zz);
@@ -107,6 +106,7 @@ public class Client {
                 }
             }
 
+//            float x, y;
 ////            Scanner sc = new Scanner(System.in);
 ////            try {
 ////                x = Float.parseFloat(sc.nextLine());

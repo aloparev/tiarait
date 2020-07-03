@@ -30,14 +30,14 @@ public class BoardTest {
 
     @Test
     public void getZz() {
-        assertEquals(146, Logic.getZz(18, 4));
-        assertEquals(395, Logic.getZz(11, 12));
+        assertEquals(146, Board.getZz(18, 4));
+        assertEquals(395, Board.getZz(11, 12));
     }
 
     @Test
     public void getXy() {
-        Cell one = Logic.getXy(146);
-        Cell two = Logic.getXy(395);
+        Cell one = Board.getXy(146);
+        Cell two = Board.getXy(395);
 
         assertEquals(18, one.x);
         assertEquals(4, one.y);
@@ -108,7 +108,7 @@ public class BoardTest {
         board.bb[13][1] = board.WALL;
         board.bb[11][1] = board.WALL;
 
-        Stack<Integer> path = board.dijkstra(Logic.getCellFromZz(44), Logic.getCellFromZz(46));
+        Stack<Integer> path = board.dijkstra(Board.getCellFromZz(44), Board.getCellFromZz(46));
         System.out.println(path);
     }
 
