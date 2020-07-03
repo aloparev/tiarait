@@ -23,7 +23,7 @@ public class Client {
     public static final int ERASER = 0;
     public static final int CUBE = 1;
     public static final int PYRAMID = 2;
-    public static final int DELAY = 200;     //milliseconds
+    public static final int DELAY = 50;     //milliseconds
     public static final int BOTS = 3;
 
     public static void main( String[] args ) throws InterruptedException {
@@ -49,22 +49,22 @@ public class Client {
         }};
         Thread[] threads = new Thread[BOTS];
 
-        log.info("testing bots location for player = " + nc.getMyPlayerNumber());
-        log.info("player0-red.bot0 x=" + nc.getX(0, 0) + " y=" + nc.getY(0, 0));
-        log.info("player0-red.bot1 x=" + nc.getX(0, 1) + " y=" + nc.getY(0, 1));
-        log.info("player0-red.bot2 x=" + nc.getX(0, 2) + " y=" + nc.getY(0, 2));
-
-        log.info("player1-blu.bot0 x=" + nc.getX(1, 0) + " y=" + nc.getY(1, 0));
-        log.info("player1-blu.bot1 x=" + nc.getX(1, 1) + " y=" + nc.getY(1, 1));
-        log.info("player1-blu.bot2 x=" + nc.getX(1, 2) + " y=" + nc.getY(1, 2));
-
-        log.info("player2-yel.bot0 x=" + nc.getX(2, 0) + " y=" + nc.getY(1, 0));
-        log.info("player2-yel.bot1 x=" + nc.getX(2, 1) + " y=" + nc.getY(1, 1));
-        log.info("player2-yel.bot2 x=" + nc.getX(2, 2) + " y=" + nc.getY(1, 2));
-
-        log.info("player3-gre.bot0 x=" + nc.getX(3, 0) + " y=" + nc.getY(1, 0));
-        log.info("player3-gre.bot1 x=" + nc.getX(3, 1) + " y=" + nc.getY(1, 1));
-        log.info("player3-gre.bot2 x=" + nc.getX(3, 2) + " y=" + nc.getY(1, 2));
+//        log.info("testing bots location for player = " + nc.getMyPlayerNumber());
+//        log.info("player0-red.bot0 x=" + nc.getX(0, 0) + " y=" + nc.getY(0, 0));
+//        log.info("player0-red.bot1 x=" + nc.getX(0, 1) + " y=" + nc.getY(0, 1));
+//        log.info("player0-red.bot2 x=" + nc.getX(0, 2) + " y=" + nc.getY(0, 2));
+//
+//        log.info("player1-blu.bot0 x=" + nc.getX(1, 0) + " y=" + nc.getY(1, 0));
+//        log.info("player1-blu.bot1 x=" + nc.getX(1, 1) + " y=" + nc.getY(1, 1));
+//        log.info("player1-blu.bot2 x=" + nc.getX(1, 2) + " y=" + nc.getY(1, 2));
+//
+//        log.info("player2-yel.bot0 x=" + nc.getX(2, 0) + " y=" + nc.getY(1, 0));
+//        log.info("player2-yel.bot1 x=" + nc.getX(2, 1) + " y=" + nc.getY(1, 1));
+//        log.info("player2-yel.bot2 x=" + nc.getX(2, 2) + " y=" + nc.getY(1, 2));
+//
+//        log.info("player3-gre.bot0 x=" + nc.getX(3, 0) + " y=" + nc.getY(1, 0));
+//        log.info("player3-gre.bot1 x=" + nc.getX(3, 1) + " y=" + nc.getY(1, 1));
+//        log.info("player3-gre.bot2 x=" + nc.getX(3, 2) + " y=" + nc.getY(1, 2));
 
         while (nc.isAlive()) {
             for(int i = 0; i < BOTS; i++) {
@@ -72,8 +72,10 @@ public class Client {
                 boolean finalGameRunning = gameRunning;
 
                 threads[bot] = new Thread(() -> {
-                    if(stacks.get(bot).isEmpty())
+                    if(stacks.get(bot).isEmpty()) {
+//                        board.stop(bot);
                         stacks.get(bot).addAll(board.analyseAndGetStack(bot));
+                    }
                     else if(finalGameRunning) {
                         int zz = stacks.get(bot).pop();
                         Cell move = board.getMoveVector(bot, zz);
@@ -81,15 +83,17 @@ public class Client {
 
                         if((board.getDistanceManhattan(board.getCoords(bot), Logic.getCellFromZz(zz)) < 2)) {
                             do {
-                                board.stop(bot);
+//                                board.stop(bot);
                                 move = board.getMoveVector(bot, zz);
                                 nc.setMoveDirection(bot, move.x, move.y);
-
-                                try {TimeUnit.MILLISECONDS.sleep(DELAY);}
-                                catch (InterruptedException e) {e.printStackTrace();}
-                            } while(board.getCoords(bot).zz != zz);
+                                try {
+                                    TimeUnit.MILLISECONDS.sleep(DELAY);
+                                } catch (InterruptedException e) {
+                                    e.printStackTrace();
+                                }
+                            } while (board.getCoords(bot).zz != zz);
                         }
-                        board.stop(bot);
+//                        board.stop(bot);
                     }
                 });
                 threads[i].start();
