@@ -25,7 +25,7 @@ public class Client {
     public static final int ERASER = 0;
     public static final int CUBE = 1;
     public static final int PYRAMID = 2;
-    public static final int DELAY = 40;     //milliseconds
+    public static final int DELAY = 2;     //milliseconds
 
     public static void main( String[] args ) throws InterruptedException {
         String team = "fox";

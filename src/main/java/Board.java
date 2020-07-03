@@ -244,7 +244,8 @@ public class Board {
     Cell getMoveVector(int bot, int targetInit) {
         Cell so = getCoords(bot);
         Cell ta = Logic.getCellFromZz(targetInit);
-        Cell ans = new Cell(getRandom(), getRandom());
+//        Cell ans = new Cell(getRandom(), getRandom());
+        Cell ans = new Cell(0,0);
 
         //up
         if(ta.y > so.y)
@@ -455,17 +456,17 @@ public class Board {
 
         try {
             do {
-                if (target != source) { //get rid of current position
+//                if (target != source) { //get rid of current position
                     path.push(target);
                     System.out.print(target + " ");
                     target = nodes.get(target).prev;
-                }
+//                }
             } while (nodes.get(target).prev != -1);
         } catch (NullPointerException ee) {
             log.info("unfoldPath NullPointer: source=" + source + " target=" + target + " path=\n" + path);
-            return new Stack<Integer>() {{
-                add(Logic.getZz(getRandom(), getRandom()));
-            }};
+            System.out.println();
+
+            path.push(Logic.getZz(getRandom(), getRandom()));
         }
 
 //        log.info("unfolding: source=" + source + ", target=" + target + ", path=" + path);
