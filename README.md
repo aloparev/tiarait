@@ -1,11 +1,14 @@
 # tiarait
 
-## run
-```
-Start des Servers: 
-java -Djava.library.path=repo/htw/ai/lenz/tiarait-server/2/lib/native/ -jar repo/htw/ai/lenz/tiarait-server/2/tiarait-server-2.jar
-```
+- server and dummy clients can be started using ./starter3
+- path finding with dijkstra
+- eraser picks out the enemy with max score
+- cube sequentially processes the field
+- pyramid relies on random generator to find target
 
-## todo
-- check target wall surroundings
-- mv logic board
+## client
+```
+mvn clean package
+java -jar target/TiaraitClient.jar <SERVER_IP> <TEAM_NAME>
+eg: java -jar target/TiaraitClient.jar 127.0.0.1 winner
+```
