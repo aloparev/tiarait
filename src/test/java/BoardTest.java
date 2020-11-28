@@ -125,7 +125,7 @@ public class BoardTest {
         board.bb[13][30] = Board.WALL;
 
         for(int i =11; i<21; i++)
-            log.info("cell " + i + "/30 = " + board.moreThanTwoWallsAround(i,30));
+            log.info("cell " + i + "/30 = " + board.moreThanOneWallAround(i,30));
         board.printArena();
     }
 }

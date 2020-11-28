@@ -70,12 +70,12 @@ public class Board {
         for(int yy=1; yy<Board.SIZE-1; yy++)
             for (int xx=1; xx < Board.SIZE-1; xx++) {
                 if(nc.isWall(xx, yy)) bb[xx][yy] = Board.WALL;
-                if(!nc.isWall(xx, yy) && moreThanTwoWallsAround(xx, yy)) bb[xx][yy] = Board.WALL;
+                if(!nc.isWall(xx, yy) && moreThanOneWallAround(xx, yy)) bb[xx][yy] = Board.WALL;
             }
 //        printArena();
     }
 
-    boolean moreThanTwoWallsAround(int x, int y) {
+    boolean moreThanOneWallAround(int x, int y) {
         int walls = 0;
 
         if (rangeOk(x, y+1) && nc.isWall(x, y + 1)) walls++;
@@ -337,7 +337,6 @@ public class Board {
             default: return getCoords(bot);
         }
     }
-
 
     boolean noEnemyAround(int x, int y) {
         if (enemyClose(x, y)) return false;
